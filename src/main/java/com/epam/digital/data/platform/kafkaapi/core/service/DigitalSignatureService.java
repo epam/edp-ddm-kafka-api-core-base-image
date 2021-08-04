@@ -5,7 +5,7 @@ import com.epam.digital.data.platform.dso.api.dto.VerifyResponseDto;
 import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.dso.client.exception.BadRequestException;
 import com.epam.digital.data.platform.dso.client.exception.InternalServerErrorException;
-import com.epam.digital.data.platform.integration.ceph.exception.CephCommuncationException;
+import com.epam.digital.data.platform.integration.ceph.exception.CephCommunicationException;
 import com.epam.digital.data.platform.integration.ceph.exception.MisconfigurationException;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicationException;
@@ -63,7 +63,7 @@ public class DigitalSignatureService {
           .orElseThrow(() ->
               new ExternalCommunicationException("Digital signature does not found in ceph",
                   Status.INTERNAL_CONTRACT_VIOLATION));
-    } catch (CephCommuncationException e) {
+    } catch (CephCommunicationException e) {
       log.error("Exception while communication with ceph", e);
       if (isEnabled) {
         throw new ExternalCommunicationException("Exception while communication with ceph", e,

@@ -1,6 +1,6 @@
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
-import com.epam.digital.data.platform.integration.ceph.exception.CephCommuncationException;
+import com.epam.digital.data.platform.integration.ceph.exception.CephCommunicationException;
 import com.epam.digital.data.platform.integration.ceph.exception.MisconfigurationException;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
 import com.epam.digital.data.platform.model.core.kafka.Response;
@@ -57,7 +57,7 @@ public class ResponseMessageCreator {
                 .setHeader(KafkaHeaders.MESSAGE_KEY, traceProvider.getRequestId())
                 .setHeader(ResponseHeaders.CEPH_RESPONSE_KEY, cephContentKey)
                 .build();
-      } catch (CephCommuncationException e) {
+      } catch (CephCommunicationException e) {
         log.error("Exception while communication with ceph", e);
         returnedToUserResponse = new Response<>();
         returnedToUserResponse.setStatus(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);

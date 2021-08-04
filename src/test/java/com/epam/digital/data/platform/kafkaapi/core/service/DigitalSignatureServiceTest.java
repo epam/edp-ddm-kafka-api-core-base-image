@@ -13,7 +13,7 @@ import com.epam.digital.data.platform.dso.api.dto.VerifyResponseDto;
 import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.dso.client.exception.BadRequestException;
 import com.epam.digital.data.platform.dso.client.exception.InternalServerErrorException;
-import com.epam.digital.data.platform.integration.ceph.exception.CephCommuncationException;
+import com.epam.digital.data.platform.integration.ceph.exception.CephCommunicationException;
 import com.epam.digital.data.platform.integration.ceph.exception.MisconfigurationException;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
 import com.epam.digital.data.platform.kafkaapi.core.config.JooqTestConfig;
@@ -91,8 +91,8 @@ class DigitalSignatureServiceTest {
   }
 
   @Test
-  void cephCommuncationExceptionChangedToExternalCommunicationException() {
-    when(cephService.getContent(any(), any())).thenThrow(CephCommuncationException.class);
+  void CephCommunicationExceptionChangedToExternalCommunicationException() {
+    when(cephService.getContent(any(), any())).thenThrow(CephCommunicationException.class);
     var actualException = assertThrows(ExternalCommunicationException.class,
         () -> digitalSignatureService.isSealValid(KEY, request));
     assertThat(actualException.getKafkaResponseStatus()).isEqualTo(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
@@ -128,10 +128,10 @@ class DigitalSignatureServiceTest {
   }
 
   @Test
-  void cephCommuncationExceptionShoudlReturnTrueWhenValidationDisabled() {
+  void CephCommunicationExceptionShoudlReturnTrueWhenValidationDisabled() {
     digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
         digitalSealRestClient, objectMapper, false);
-    when(cephService.getContent(any(), any())).thenThrow(CephCommuncationException.class);
+    when(cephService.getContent(any(), any())).thenThrow(CephCommunicationException.class);
     assertTrue(digitalSignatureService.isSealValid(KEY, request));
   }
 

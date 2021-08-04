@@ -7,7 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.epam.digital.data.platform.integration.ceph.exception.CephCommuncationException;
+import com.epam.digital.data.platform.integration.ceph.exception.CephCommunicationException;
 import com.epam.digital.data.platform.integration.ceph.exception.MisconfigurationException;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
@@ -84,7 +84,7 @@ class ResponseMessageCreatorTest {
     var responseToProcess = mockResponse();
     var serializedResponseStr = "qwerty";
     when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
-    doThrow(new CephCommuncationException("", new RuntimeException()))
+    doThrow(new CephCommunicationException("", new RuntimeException()))
         .when(cephService)
         .putContent(any(), any(), any());
 
