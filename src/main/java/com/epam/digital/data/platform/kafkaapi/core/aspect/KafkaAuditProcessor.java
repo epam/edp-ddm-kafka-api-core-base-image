@@ -1,23 +1,21 @@
 package com.epam.digital.data.platform.kafkaapi.core.aspect;
 
+import com.epam.digital.data.platform.kafkaapi.core.exception.AuditException;
 import com.epam.digital.data.platform.kafkaapi.core.service.KafkaEventsFacade;
+import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.epam.digital.data.platform.starter.audit.model.EventType;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
-@Aspect
 @Component
-public class AuditKafkaEventsAspect implements KafkaGenericListenerAspect {
+public class KafkaAuditProcessor implements AuditProcessor<Operation> {
 
   private final Set<Status> auditableStatusToHandler =
       Set.of(Status.INVALID_SIGNATURE, Status.JWT_INVALID, Status.FORBIDDEN_OPERATION);
@@ -32,33 +30,27 @@ public class AuditKafkaEventsAspect implements KafkaGenericListenerAspect {
   static final String BEFORE = "BEFORE";
   static final String AFTER = "AFTER";
 
-  public AuditKafkaEventsAspect(KafkaEventsFacade kafkaEventsFacade) {
+  public KafkaAuditProcessor(KafkaEventsFacade kafkaEventsFacade) {
     this.kafkaEventsFacade = kafkaEventsFacade;
   }
 
-  @Around("kafkaCreate() && args(.., request)")
-  Object auditKafkaCreate(ProceedingJoinPoint joinPoint, Request<?> request) throws Throwable {
-    return prepareAndSendKafkaAudit(joinPoint, request, CREATE);
-  }
-
-  @Around("kafkaRead() && args(.., request)")
-  Object auditKafkaRead(ProceedingJoinPoint joinPoint, Request<?> request) throws Throwable {
-    return prepareAndSendKafkaAudit(joinPoint, request, READ);
-  }
-
-  @Around("kafkaUpdate() && args(.., request)")
-  Object auditKafkaUpdate(ProceedingJoinPoint joinPoint, Request<?> request) throws Throwable {
-    return prepareAndSendKafkaAudit(joinPoint, request, UPDATE);
-  }
-
-  @Around("kafkaDelete() && args(.., request)")
-  Object auditKafkaDelete(ProceedingJoinPoint joinPoint, Request<?> request) throws Throwable {
-    return prepareAndSendKafkaAudit(joinPoint, request, DELETE);
-  }
-
-  @Around("kafkaSearch() && args(.., request)")
-  Object auditKafkaSearch(ProceedingJoinPoint joinPoint, Request<?> request) throws Throwable {
-    return prepareAndSendKafkaAudit(joinPoint, request, SEARCH);
+  @Override
+  public Object process(ProceedingJoinPoint joinPoint, Operation operation) throws Throwable {
+    var request = getArgumentByType(joinPoint, Request.class);
+    switch (operation) {
+      case CREATE:
+        return prepareAndSendKafkaAudit(joinPoint, request, CREATE);
+      case READ:
+        return prepareAndSendKafkaAudit(joinPoint, request, READ);
+      case UPDATE:
+        return prepareAndSendKafkaAudit(joinPoint, request, UPDATE);
+      case DELETE:
+        return prepareAndSendKafkaAudit(joinPoint, request, DELETE);
+      case SEARCH:
+        return prepareAndSendKafkaAudit(joinPoint, request, SEARCH);
+      default:
+        throw new AuditException("Unsupported audit operation");
+    }
   }
 
   private Object prepareAndSendKafkaAudit(ProceedingJoinPoint joinPoint, Request<?> request,

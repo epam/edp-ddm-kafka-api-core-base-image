@@ -1,19 +1,19 @@
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler.util;
 
+import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ProcedureErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.util.JwtClaimsUtils;
+import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.kafkaapi.core.util.SQLExceptionResolverUtil;
-import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
-import org.postgresql.util.HStoreConverter;
-import org.springframework.stereotype.Component;
-
-import javax.sql.DataSource;
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
+import javax.sql.DataSource;
+import org.postgresql.util.HStoreConverter;
+import org.springframework.stereotype.Component;
 
 @Component
 public class DmlOperationHandler {
@@ -26,17 +26,15 @@ public class DmlOperationHandler {
     this.dataSource = dataSource;
   }
 
-  public String save(
-      String tableName,
-      JwtClaimsDto userClaims,
-      Map<String, String> sysValues,
-      Map<String, Object> businessValues) {
+  @DatabaseAudit(Operation.CREATE)
+  public String save(DmlOperationArgs args) {
     try (Connection connection = dataSource.getConnection();
         CallableStatement statement = connection.prepareCall(DmlOperation.I.getSqlString())) {
-      Array rolesDbArray = connection.createArrayOf("text", JwtClaimsUtils.getRoles(userClaims).toArray());
-      statement.setString(1, tableName);
-      statement.setString(2, HStoreConverter.toString(sysValues));
-      statement.setString(3, HStoreConverter.toString(businessValues));
+      Array rolesDbArray = connection
+          .createArrayOf("text", JwtClaimsUtils.getRoles(args.getUserClaims()).toArray());
+      statement.setString(1, args.getTableName());
+      statement.setString(2, HStoreConverter.toString(args.getSysValues()));
+      statement.setString(3, HStoreConverter.toString(args.getBusinessValues()));
       statement.setArray(4, rolesDbArray);
       ResultSet resultSet = statement.executeQuery();
       if (resultSet.next()) {
@@ -50,19 +48,16 @@ public class DmlOperationHandler {
     }
   }
 
-  public void update(
-      String tableName,
-      JwtClaimsDto userClaims,
-      String entityId,
-      Map<String, String> sysValues,
-      Map<String, Object> businessValues) {
+  @DatabaseAudit(Operation.UPDATE)
+  public void update(DmlOperationArgs args) {
     try (Connection connection = dataSource.getConnection();
         CallableStatement statement = connection.prepareCall(DmlOperation.U.getSqlString())) {
-      Array rolesDbArray = connection.createArrayOf("text", JwtClaimsUtils.getRoles(userClaims).toArray());
-      statement.setString(1, tableName);
-      statement.setString(2, entityId);
-      statement.setString(3, HStoreConverter.toString(sysValues));
-      statement.setString(4, HStoreConverter.toString(businessValues));
+      Array rolesDbArray = connection
+          .createArrayOf("text", JwtClaimsUtils.getRoles(args.getUserClaims()).toArray());
+      statement.setString(1, args.getTableName());
+      statement.setString(2, args.getEntityId());
+      statement.setString(3, HStoreConverter.toString(args.getSysValues()));
+      statement.setString(4, HStoreConverter.toString(args.getBusinessValues()));
       statement.setArray(5, rolesDbArray);
       statement.execute();
     } catch (SQLException e) {
@@ -70,14 +65,15 @@ public class DmlOperationHandler {
     }
   }
 
-  public void delete(
-      String tableName, JwtClaimsDto userClaims, String entityId, Map<String, String> sysValues) {
+  @DatabaseAudit(Operation.DELETE)
+  public void delete(DmlOperationArgs args) {
     try (Connection connection = dataSource.getConnection();
         CallableStatement statement = connection.prepareCall(DmlOperation.D.getSqlString())) {
-      Array rolesDbArray = connection.createArrayOf("text", JwtClaimsUtils.getRoles(userClaims).toArray());
-      statement.setString(1, tableName);
-      statement.setString(2, entityId);
-      statement.setString(3, HStoreConverter.toString(sysValues));
+      Array rolesDbArray = connection
+          .createArrayOf("text", JwtClaimsUtils.getRoles(args.getUserClaims()).toArray());
+      statement.setString(1, args.getTableName());
+      statement.setString(2, args.getEntityId());
+      statement.setString(3, HStoreConverter.toString(args.getSysValues()));
       statement.setArray(4, rolesDbArray);
       statement.execute();
     } catch (SQLException e) {

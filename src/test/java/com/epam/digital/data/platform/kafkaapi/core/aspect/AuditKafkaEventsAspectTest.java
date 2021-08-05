@@ -15,7 +15,6 @@ import com.epam.digital.data.platform.kafkaapi.core.service.DigitalSignatureServ
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtValidationService;
 import com.epam.digital.data.platform.kafkaapi.core.service.KafkaEventsFacade;
 import com.epam.digital.data.platform.kafkaapi.core.service.ResponseMessageCreator;
-import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntityContains;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
@@ -31,10 +30,15 @@ import org.springframework.messaging.support.MessageBuilder;
 @Import({AopAutoConfiguration.class})
 @SpringBootTest(
     classes = {
-        AuditKafkaEventsAspect.class,
+        AuditAspect.class,
+        KafkaAuditProcessor.class,
         GenericQueryListenerTestImpl.class,
         GenericSearchListenerTestImpl.class
     })
+@MockBean(DatabaseAuditProcessor.class)
+@MockBean(AbstractSearchHandler.class)
+@MockBean(AbstractCommandHandler.class)
+@MockBean(AbstractQueryHandler.class)
 class AuditKafkaEventsAspectTest {
 
   @Autowired
@@ -43,24 +47,18 @@ class AuditKafkaEventsAspectTest {
   private GenericSearchListenerTestImpl genericSearchListener;
 
   @MockBean
-  AbstractSearchHandler<MockEntityContains, MockEntity> searchHandler;
-  @MockBean
   private KafkaEventsFacade kafkaEventsFacade;
   @MockBean
-  AbstractCommandHandler commandHandler;
+  private DigitalSignatureService signatureService;
   @MockBean
-  AbstractQueryHandler queryHandler;
+  private JwtValidationService jwtValidationService;
   @MockBean
-  DigitalSignatureService signatureService;
-  @MockBean
-  JwtValidationService jwtValidationService;
-  @MockBean
-  ResponseMessageCreator responseMessageCreator;
+  private ResponseMessageCreator responseMessageCreator;
 
   @BeforeEach
   void beforeEach() {
     when(responseMessageCreator.createMessageByPayloadSize(any()))
-            .thenReturn(MessageBuilder.withPayload(new Response<>()).build());
+        .thenReturn(MessageBuilder.withPayload(new Response<>()).build());
   }
 
   @Test
@@ -69,16 +67,16 @@ class AuditKafkaEventsAspectTest {
     genericQueryListener.create("", new Request());
 
     verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(),any(), any(), any(), any(), any());
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectOnlyBeforeWhenExceptionOnCreateMethod() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class,() -> genericQueryListener.create("", new Request()));
+    assertThrows(RuntimeException.class, () -> genericQueryListener.create("", new Request()));
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(),any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -87,16 +85,16 @@ class AuditKafkaEventsAspectTest {
     genericQueryListener.read("", new Request());
 
     verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(),any(), any(), any(), any(), any());
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectOnlyBeforeWhenExceptionOnReadMethod() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class,() -> genericQueryListener.read("", new Request()));
+    assertThrows(RuntimeException.class, () -> genericQueryListener.read("", new Request()));
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(),any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -105,16 +103,16 @@ class AuditKafkaEventsAspectTest {
     genericQueryListener.update("", new Request());
 
     verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(),any(), any(), any(), any(), any());
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectOnlyBeforeWhenExceptionOnUpdateMethod() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class,() -> genericQueryListener.update("", new Request()));
+    assertThrows(RuntimeException.class, () -> genericQueryListener.update("", new Request()));
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(),any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -123,16 +121,16 @@ class AuditKafkaEventsAspectTest {
     genericQueryListener.delete("", new Request());
 
     verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(),any(), any(), any(), any(), any());
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectOnlyBeforeWhenExceptionOnDeleteMethod() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class,() -> genericQueryListener.delete("", new Request()));
+    assertThrows(RuntimeException.class, () -> genericQueryListener.delete("", new Request()));
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(),any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -141,7 +139,7 @@ class AuditKafkaEventsAspectTest {
     genericSearchListener.search("", new Request<>(new MockEntityContains(), null, null));
 
     verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(),any(), any(), any(), any(), any());
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -149,8 +147,9 @@ class AuditKafkaEventsAspectTest {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
     assertThrows(RuntimeException.class,
-        () -> genericSearchListener.search("", new Request<>(new MockEntityContains(), null, null)));
+        () -> genericSearchListener
+            .search("", new Request<>(new MockEntityContains(), null, null)));
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(),any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 }

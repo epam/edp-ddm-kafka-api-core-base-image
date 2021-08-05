@@ -1,19 +1,19 @@
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler.util;
 
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ConstraintViolationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ForbiddenOperationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ProcedureErrorException;
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
 import com.epam.digital.data.platform.starter.security.dto.RolesDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.sql.DataSource;
-
 import java.sql.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -22,13 +22,12 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import javax.sql.DataSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class DmlOperationHandlerTest {
@@ -79,7 +78,10 @@ class DmlOperationHandlerTest {
     when(resultSet.next()).thenReturn(true);
     when(resultSet.getString(any())).thenReturn(ENTITY_ID);
 
-    String actual = dmlOperationHandler.save(TABLE_NAME, getMockedClaims(), sysValues, businessValues);
+    String actual = dmlOperationHandler.save(
+        DmlOperationArgs.builder(TABLE_NAME, getMockedClaims(), sysValues)
+            .saveOperationArgs(businessValues)
+            .build());
 
     assertThat(actual).isEqualTo(ENTITY_ID);
 
@@ -98,7 +100,10 @@ class DmlOperationHandlerTest {
     JwtClaimsDto userClaims = getMockedClaims();
 
     ProcedureErrorException e = assertThrows(ProcedureErrorException.class,
-            () -> dmlOperationHandler.save(TABLE_NAME, userClaims, sysValues, businessValues));
+        () -> dmlOperationHandler.save(
+            DmlOperationArgs.builder(TABLE_NAME, userClaims, sysValues)
+                .saveOperationArgs(businessValues)
+                .build()));
 
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.PROCEDURE_ERROR);
     assertThat(e.getDetails()).isNull();
@@ -108,7 +113,10 @@ class DmlOperationHandlerTest {
   void expectUpdateExecutedSuccessfully() throws SQLException {
     when(connection.createArrayOf("text", ROLES.toArray())).thenReturn(rolesDbArray);
 
-    dmlOperationHandler.update(TABLE_NAME, getMockedClaims(), ENTITY_ID, sysValues, businessValues);
+    dmlOperationHandler.update(
+        DmlOperationArgs.builder(TABLE_NAME, getMockedClaims(), sysValues)
+            .updateOperationArgs(ENTITY_ID, businessValues)
+            .build());
 
     verify(callableStatement).execute();
     verify(callableStatement).setString(1, TABLE_NAME);
@@ -125,7 +133,10 @@ class DmlOperationHandlerTest {
     JwtClaimsDto userClaims = getMockedClaims();
 
     ConstraintViolationException e = assertThrows(ConstraintViolationException.class,
-            () -> dmlOperationHandler.update(TABLE_NAME, userClaims, ENTITY_ID, sysValues, businessValues));
+        () -> dmlOperationHandler.update(
+            DmlOperationArgs.builder(TABLE_NAME, userClaims, sysValues)
+                .updateOperationArgs(ENTITY_ID, businessValues)
+                .build()));
 
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.CONSTRAINT_VIOLATION);
     assertThat(e.getDetails()).isEqualTo("foreign key");
@@ -135,7 +146,10 @@ class DmlOperationHandlerTest {
   void expectDeleteExecutedSuccessfully() throws SQLException {
     when(connection.createArrayOf("text", ROLES.toArray())).thenReturn(rolesDbArray);
 
-    dmlOperationHandler.delete(TABLE_NAME, getMockedClaims(), ENTITY_ID, sysValues);
+    dmlOperationHandler.delete(
+        DmlOperationArgs.builder(TABLE_NAME, getMockedClaims(), sysValues)
+            .deleteOperationArgs(ENTITY_ID)
+            .build());
 
     verify(callableStatement).execute();
     verify(callableStatement).setString(1, TABLE_NAME);
@@ -151,7 +165,10 @@ class DmlOperationHandlerTest {
     JwtClaimsDto userClaims = getMockedClaims();
 
     ProcedureErrorException e = assertThrows(ProcedureErrorException.class,
-            () -> dmlOperationHandler.delete(TABLE_NAME, userClaims, ENTITY_ID, sysValues));
+        () -> dmlOperationHandler.delete(
+            DmlOperationArgs.builder(TABLE_NAME, userClaims, sysValues)
+                .deleteOperationArgs(ENTITY_ID)
+                .build()));
 
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.PROCEDURE_ERROR);
     assertThat(e.getDetails()).isNull();
@@ -164,7 +181,10 @@ class DmlOperationHandlerTest {
     JwtClaimsDto userClaims = getMockedClaims();
 
     ForbiddenOperationException e = assertThrows(ForbiddenOperationException.class,
-            () -> dmlOperationHandler.delete(TABLE_NAME, userClaims, ENTITY_ID, sysValues));
+        () -> dmlOperationHandler.delete(
+            DmlOperationArgs.builder(TABLE_NAME, userClaims, sysValues)
+                .deleteOperationArgs(ENTITY_ID)
+                .build()));
 
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.FORBIDDEN_OPERATION);
     assertThat(e.getDetails()).isNull();

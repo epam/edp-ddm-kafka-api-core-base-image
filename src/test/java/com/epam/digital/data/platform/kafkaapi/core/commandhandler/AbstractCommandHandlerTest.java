@@ -1,8 +1,16 @@
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
 
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CommandHandlerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ConstraintViolationException;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
@@ -12,22 +20,14 @@ import com.epam.digital.data.platform.model.core.kafka.RequestContext;
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
 import com.epam.digital.data.platform.starter.security.dto.RolesDto;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = CommandHandlerTestImpl.class)
 class AbstractCommandHandlerTest {
@@ -62,7 +62,9 @@ class AbstractCommandHandlerTest {
     when(entityConverter.entityToMap(any())).thenReturn(mockEntityMap);
     Map<String, String> mockSysValuesMap = new HashMap<>();
     when(entityConverter.buildSysValues(USER_ID, request)).thenReturn(mockSysValuesMap);
-    when(dmlOperationHandler.save("table", userClaims, mockSysValuesMap, mockEntityMap))
+    when(dmlOperationHandler.save(
+        DmlOperationArgs.builder("table", userClaims, mockSysValuesMap)
+            .saveOperationArgs(mockEntityMap).build()))
         .thenReturn(ENTITY_ID.toString());
 
     var result = commandHandler.save(request);
@@ -70,7 +72,10 @@ class AbstractCommandHandlerTest {
     verify(entityConverter).entityToMap(request.getPayload());
     verify(entityConverter).buildSysValues(USER_ID, request);
     verify(dmlOperationHandler)
-        .save("table", userClaims, mockSysValuesMap, mockEntityMap);
+        .save(
+            DmlOperationArgs.builder("table", userClaims, mockSysValuesMap)
+                .saveOperationArgs(mockEntityMap)
+                .build());
 
     assertThat(mockEntityMap).doesNotContainKey("consent_id");
     assertThat(result).isEqualTo(new EntityId(ENTITY_ID));
@@ -89,11 +94,9 @@ class AbstractCommandHandlerTest {
     verify(entityConverter).buildSysValues(USER_ID, request);
     verify(dmlOperationHandler)
         .update(
-            "table",
-            userClaims,
-            ENTITY_ID.toString(),
-            mockSysValuesMap,
-            mockEntityMap);
+            DmlOperationArgs.builder("table", userClaims, mockSysValuesMap)
+                .updateOperationArgs(ENTITY_ID.toString(), mockEntityMap)
+                .build());
 
     assertThat(mockEntityMap).doesNotContainKey("consent_id");
   }
@@ -123,7 +126,10 @@ class AbstractCommandHandlerTest {
     verify(entityConverter).getUuidOfEntity(request.getPayload(), "consent_id");
     verify(entityConverter).buildSysValues(USER_ID, request);
     verify(dmlOperationHandler)
-        .delete("table", userClaims, ENTITY_ID.toString(), mockSysValuesMap);
+        .delete(
+            DmlOperationArgs.builder("table", userClaims, mockSysValuesMap)
+                .deleteOperationArgs(ENTITY_ID.toString())
+                .build());
   }
 
   private JwtClaimsDto getMockedClaims() {

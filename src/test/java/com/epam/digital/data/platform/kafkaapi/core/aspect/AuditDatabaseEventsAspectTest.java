@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.config.JooqTestConfig;
@@ -47,11 +48,15 @@ import org.springframework.test.context.ContextConfiguration;
 @Import({AopAutoConfiguration.class})
 @SpringBootTest(
     classes = {
-        AuditDatabaseEventsAspect.class,
+        AuditAspect.class,
+        DatabaseAuditProcessor.class,
         DmlOperationHandler.class,
         QueryHandlerTestImpl.class,
         AbstractSearchHandlerTestImpl.class
     })
+@MockBean(KafkaAuditProcessor.class)
+@MockBean(JwtInfoProvider.class)
+@MockBean(EntityConverter.class)
 @ContextConfiguration(classes = JooqTestConfig.class)
 class AuditDatabaseEventsAspectTest {
 
@@ -64,23 +69,24 @@ class AuditDatabaseEventsAspectTest {
   private QueryHandlerTestImpl abstractQueryHandler;
   @Autowired
   private AbstractSearchHandlerTestImpl abstractSearchHandlerTest;
-  @MockBean
-  private JwtInfoProvider jwtInfoProvider;
+
   @MockBean
   private AccessPermissionService<MockEntity> accessPermissionService;
-
   @MockBean
   private DatabaseEventsFacade databaseEventsFacade;
   @MockBean
   private DataSource dataSource;
-  @MockBean
-  private EntityConverter entityConverter;
+
   @Mock
   private ResultSet resultSet;
   @Mock
   private Connection connection;
   @Mock
   private CallableStatement callableStatement;
+
+  private DmlOperationArgs mockSaveArgs;
+  private DmlOperationArgs mockUpdateArgs;
+  private DmlOperationArgs mockDeleteArgs;
 
   @BeforeAll
   static void init() throws IOException {
@@ -95,6 +101,12 @@ class AuditDatabaseEventsAspectTest {
     when(callableStatement.executeQuery()).thenReturn(resultSet);
     when(resultSet.next()).thenReturn(true);
     when(resultSet.getString("f_row_insert")).thenReturn("42");
+    mockSaveArgs = DmlOperationArgs.builder("", mockJwtClaimsDto(),
+        new HashMap<>()).saveOperationArgs(new HashMap<>()).build();
+    mockUpdateArgs = DmlOperationArgs.builder("", mockJwtClaimsDto(),
+        new HashMap<>()).updateOperationArgs(ENTITY_ID, new HashMap<>()).build();
+    mockDeleteArgs = DmlOperationArgs.builder("", mockJwtClaimsDto(),
+        new HashMap<>()).deleteOperationArgs(ENTITY_ID).build();
   }
 
   @Test
@@ -112,13 +124,14 @@ class AuditDatabaseEventsAspectTest {
         ForbiddenOperationException.class,
         () -> abstractQueryHandler.findById(mockRequest(ACCESS_TOKEN, ENTITY_ID)));
 
-    verify(databaseEventsFacade).sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(databaseEventsFacade)
+        .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectBeforeAndAfterSaveMethodWhenNoExceptionAndResultExist() {
 
-    dmlOperationHandler.save("", mockJwtClaimsDto(), new HashMap<>(), new HashMap<>());
+    dmlOperationHandler.save(mockSaveArgs);
 
     verify(databaseEventsFacade, times(2))
         .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
@@ -130,9 +143,10 @@ class AuditDatabaseEventsAspectTest {
 
     assertThrows(
         RequestProcessingException.class,
-        () -> dmlOperationHandler.save("", mockJwtClaimsDto(), new HashMap<>(), new HashMap<>()));
+        () -> dmlOperationHandler.save(mockSaveArgs));
 
-    verify(databaseEventsFacade).sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(databaseEventsFacade)
+        .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -141,15 +155,16 @@ class AuditDatabaseEventsAspectTest {
 
     assertThrows(
         ProcedureErrorException.class,
-        () -> dmlOperationHandler.save("", mockJwtClaimsDto(), new HashMap<>(), new HashMap<>()));
+        () -> dmlOperationHandler.save(mockSaveArgs));
 
-    verify(databaseEventsFacade).sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(databaseEventsFacade)
+        .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectBeforeAndAfterUpdateMethodWhenNoException() {
 
-    dmlOperationHandler.update("", mockJwtClaimsDto(), ENTITY_ID, new HashMap<>(), new HashMap<>());
+    dmlOperationHandler.update(mockUpdateArgs);
 
     verify(databaseEventsFacade, times(2))
         .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
@@ -162,15 +177,16 @@ class AuditDatabaseEventsAspectTest {
     assertThrows(
         RequestProcessingException.class,
         () -> dmlOperationHandler
-            .update("", mockJwtClaimsDto(), ENTITY_ID, new HashMap<>(), new HashMap<>()));
+            .update(mockSaveArgs));
 
-    verify(databaseEventsFacade).sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(databaseEventsFacade)
+        .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test
   void expectAuditAspectBeforeAndAfterDeleteMethodWhenNoException() {
 
-    dmlOperationHandler.delete("", mockJwtClaimsDto(), ENTITY_ID, new HashMap<>());
+    dmlOperationHandler.delete(mockDeleteArgs);
 
     verify(databaseEventsFacade, times(2))
         .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
@@ -182,9 +198,10 @@ class AuditDatabaseEventsAspectTest {
 
     assertThrows(
         RequestProcessingException.class,
-        () -> dmlOperationHandler.delete("", mockJwtClaimsDto(), ENTITY_ID, new HashMap<>()));
+        () -> dmlOperationHandler.delete(mockDeleteArgs));
 
-    verify(databaseEventsFacade).sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
+    verify(databaseEventsFacade)
+        .sendDbAudit(any(), any(), any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -222,7 +239,7 @@ class AuditDatabaseEventsAspectTest {
     return result;
   }
 
-  private<T> Request mockRequest(String jwt, T payload) {
+  private <T> Request mockRequest(String jwt, T payload) {
     SecurityContext sc = new SecurityContext(jwt, null, null);
     return new Request(payload, null, sc);
   }
