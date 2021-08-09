@@ -12,8 +12,6 @@ import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicat
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.GenericMessage;
@@ -21,8 +19,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DigitalSignatureService {
-
-  private final Logger log = LoggerFactory.getLogger(DigitalSignatureService.class);
 
   private final CephService datafactoryCephService;
   private final String cephBucketName;
@@ -45,64 +41,53 @@ public class DigitalSignatureService {
   }
 
   public <O> boolean isSealValid(String key, O input) {
+    if (!isEnabled) {
+      return true;
+    }
 
     if (key == null) {
-      if (isEnabled) {
-        throw new ExternalCommunicationException("Required kafka header is missing",
-            new MessageHandlingException(
-                new GenericMessage<>("Required kafka header is missing")),
-            Status.INTERNAL_CONTRACT_VIOLATION);
-      } else {
-        return true;
-      }
+      throw new ExternalCommunicationException(
+          "Required kafka header is missing",
+          new MessageHandlingException(new GenericMessage<>("Required kafka header is missing")),
+          Status.INTERNAL_CONTRACT_VIOLATION);
     }
 
     String signature;
     try {
-      signature = datafactoryCephService.getContent(cephBucketName, key)
-          .orElseThrow(() ->
-              new ExternalCommunicationException("Digital signature does not found in ceph",
-                  Status.INTERNAL_CONTRACT_VIOLATION));
+      signature =
+          datafactoryCephService
+              .getContent(cephBucketName, key)
+              .orElseThrow(
+                  () ->
+                      new ExternalCommunicationException(
+                          "Digital signature does not found in ceph",
+                          Status.INTERNAL_CONTRACT_VIOLATION));
     } catch (CephCommunicationException e) {
-      log.error("Exception while communication with ceph", e);
-      if (isEnabled) {
-        throw new ExternalCommunicationException("Exception while communication with ceph", e,
-            Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
-      }
-      return true;
+      throw new ExternalCommunicationException(
+          "Exception while communication with ceph", e, Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
     } catch (MisconfigurationException e) {
-      log.error("Incorrect Ceph configuration", e);
-      if (isEnabled) {
-        throw new ExternalCommunicationException("Incorrect Ceph configuration", e,
-            Status.INTERNAL_CONTRACT_VIOLATION);
-      }
-      return true;
+      throw new ExternalCommunicationException(
+          "Incorrect Ceph configuration", e, Status.INTERNAL_CONTRACT_VIOLATION);
     }
+
     return verify(signature, serialize(input));
   }
 
   private boolean verify(String signature, String data) {
     try {
-      VerifyResponseDto responseDto = digitalSealRestClient
-          .verify(new VerifyRequestDto(signature, data));
-      if (isEnabled) {
-        return responseDto.isValid;
-      }
-      return true;
+      VerifyResponseDto responseDto =
+          digitalSealRestClient.verify(new VerifyRequestDto(signature, data));
+      return responseDto.isValid;
     } catch (BadRequestException e) {
-      if (isEnabled) {
-        throw new ExternalCommunicationException(
-            "Call to external digital signature service violates an internal contract", e,
-            Status.INTERNAL_CONTRACT_VIOLATION);
-      }
-      return true;
+      throw new ExternalCommunicationException(
+          "Call to external digital signature service violates an internal contract",
+          e,
+          Status.INTERNAL_CONTRACT_VIOLATION);
     } catch (InternalServerErrorException e) {
-      if (isEnabled) {
-        throw new ExternalCommunicationException(
-            "External digital signature service has internal server error", e,
-            Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
-      }
-      return true;
+      throw new ExternalCommunicationException(
+          "External digital signature service has internal server error",
+          e,
+          Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
     }
   }
 

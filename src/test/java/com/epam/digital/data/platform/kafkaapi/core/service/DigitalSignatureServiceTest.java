@@ -3,7 +3,6 @@ package com.epam.digital.data.platform.kafkaapi.core.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +40,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(classes = JooqTestConfig.class)
 class DigitalSignatureServiceTest {
 
-  private static final String BACKET = "backet";
+  private static final String BUCKET = "bucket";
   private static final String SIGNATURE = "signature";
   private static final String KEY = "datafactory-key";
   @Mock
@@ -51,15 +50,15 @@ class DigitalSignatureServiceTest {
   @Autowired
   private ObjectMapper objectMapper;
   private DigitalSignatureService digitalSignatureService;
-  private Request request;
+  private Request<MockEntity> request;
 
   @BeforeEach
   void init() {
     MockitoAnnotations.initMocks(this);
-    when(cephService.getContent(BACKET, KEY)).thenReturn(Optional.of(SIGNATURE));
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
+    when(cephService.getContent(BUCKET, KEY)).thenReturn(Optional.of(SIGNATURE));
+    digitalSignatureService = new DigitalSignatureService(cephService, BUCKET,
         digitalSealRestClient, objectMapper, true);
-    request = new Request(getMockPayload(), null, null);
+    request = new Request<>(getMockPayload(), null, null);
     when(digitalSealRestClient.verify(any()))
         .thenReturn(new VerifyResponseDto().toBuilder().build());
   }
@@ -68,14 +67,6 @@ class DigitalSignatureServiceTest {
   void kafkaHeaderAbsentThrowsException() {
     assertThrows(ExternalCommunicationException.class,
         () -> digitalSignatureService.isSealValid(null, request));
-  }
-
-  @Test
-  void kafkaHeaderAbsentReturnTrueWhenValidationDisabled() {
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
-        digitalSealRestClient, objectMapper, false);
-
-    assertTrue(digitalSignatureService.isSealValid(null, request));
   }
 
   @Test
@@ -91,7 +82,7 @@ class DigitalSignatureServiceTest {
   }
 
   @Test
-  void CephCommunicationExceptionChangedToExternalCommunicationException() {
+  void cephCommunicationExceptionChangedToExternalCommunicationException() {
     when(cephService.getContent(any(), any())).thenThrow(CephCommunicationException.class);
     var actualException = assertThrows(ExternalCommunicationException.class,
         () -> digitalSignatureService.isSealValid(KEY, request));
@@ -128,40 +119,18 @@ class DigitalSignatureServiceTest {
   }
 
   @Test
-  void CephCommunicationExceptionShoudlReturnTrueWhenValidationDisabled() {
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
-        digitalSealRestClient, objectMapper, false);
-    when(cephService.getContent(any(), any())).thenThrow(CephCommunicationException.class);
-    assertTrue(digitalSignatureService.isSealValid(KEY, request));
+  void shouldReturnTrueWhenValidationDisabled() {
+    digitalSignatureService = new DigitalSignatureService(cephService, BUCKET,
+            digitalSealRestClient, objectMapper, false);
+
+    var actual = digitalSignatureService.isSealValid(KEY, request);
+
+    assertThat(actual).isTrue();
   }
 
   @Test
-  void misconfigurationExceptionShoudlReturnTrueWhenValidationDisabled() {
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
-        digitalSealRestClient, objectMapper, false);
-    when(cephService.getContent(any(), any())).thenThrow(MisconfigurationException.class);
-    assertTrue(digitalSignatureService.isSealValid(KEY, request));
-  }
-
-  @Test
-  void badRequestExceptionShoudlReturnTrueWhenValidationDisabled() {
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
-        digitalSealRestClient, objectMapper, false);
-    when(digitalSealRestClient.verify(any())).thenThrow(BadRequestException.class);
-    assertTrue(digitalSignatureService.isSealValid(KEY, request));
-  }
-
-  @Test
-  void internalServerErrorExceptionShoudlReturnTrueWhenValidationDisabled() {
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
-        digitalSealRestClient, objectMapper, false);
-    when(digitalSealRestClient.verify(any())).thenThrow(InternalServerErrorException.class);
-    assertTrue(digitalSignatureService.isSealValid(KEY, request));
-  }
-
-  @Test
-  void JsonProcessingExceptionChangedToIllegalStateException() {
-    digitalSignatureService = new DigitalSignatureService(cephService, BACKET,
+  void jsonProcessingExceptionChangedToIllegalStateException() {
+    digitalSignatureService = new DigitalSignatureService(cephService, BUCKET,
         digitalSealRestClient, new ObjectMapper(), true);
 
     assertThrows(IllegalStateException.class,
