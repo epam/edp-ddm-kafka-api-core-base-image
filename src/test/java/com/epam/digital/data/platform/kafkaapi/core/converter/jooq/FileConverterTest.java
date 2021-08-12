@@ -9,7 +9,7 @@ import org.postgresql.util.PGobject;
 
 class FileConverterTest {
 
-  private static final String FILE_DB_TYPE = "typ_file";
+  private static final String FILE_DB_TYPE = "type_file";
   private static final String FILE_ID = "id";
   private static final String FILE_CHECKSUM = "checksum";
 

@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 public class AccessPermissionService<O> {
 
   private static final String PERMISSION_CHECK_SQL_STRING =
-      "select f_check_permissions(?, ?, ?::typ_operation, ?);";
-  private static final String SEARCH_TYP_OPERATION = "S";
+      "select f_check_permissions(?, ?, ?::type_operation, ?);";
+  private static final String SEARCH_TYPE_OPERATION = "S";
 
   private final DataSource dataSource;
   private final ObjectMapper objectMapper;
@@ -44,7 +44,7 @@ public class AccessPermissionService<O> {
       Array searchFieldsDbArray = connection.createArrayOf("text", fields.toArray());
       statement.setString(1, tableName);
       statement.setArray(2, userRolesDbArray);
-      statement.setString(3, SEARCH_TYP_OPERATION);
+      statement.setString(3, SEARCH_TYPE_OPERATION);
       statement.setArray(4, searchFieldsDbArray);
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {

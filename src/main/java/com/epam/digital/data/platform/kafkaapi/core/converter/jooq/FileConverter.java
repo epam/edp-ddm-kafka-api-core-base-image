@@ -10,7 +10,7 @@ import java.sql.SQLException;
 
 public class FileConverter implements Converter<Object, File> {
 
-  private static final String DB_TYPE = "typ_file";
+  private static final String DB_TYPE = "type_file";
 
   @Override
   public File from(Object o) {
