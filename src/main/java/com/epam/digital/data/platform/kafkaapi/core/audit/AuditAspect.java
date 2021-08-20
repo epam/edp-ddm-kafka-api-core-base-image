@@ -1,4 +1,4 @@
-package com.epam.digital.data.platform.kafkaapi.core.aspect;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit;
 import com.epam.digital.data.platform.kafkaapi.core.annotation.KafkaAudit;

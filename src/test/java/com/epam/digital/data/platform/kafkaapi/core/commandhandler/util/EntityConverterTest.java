@@ -35,7 +35,7 @@ class EntityConverterTest {
   private static final String SOURCE_SYSTEM = "Source system";
   private static final String SOURCE_APPLICATION = "Source application";
   private static final String SOURCE_PROCESS = "Source process";
-  private static final String SOURCE_ACTIVITY = "Source activity";
+  private static final String BUSINESS_ACTIVITY = "Source activity";
   private static final String PROCESS_DEFINITION_ID = "Process definition id";
   private static final String PROCESS_INSTANCE_ID = "Process instance id";
   private static final String ACTIVITY_INSTANCE_ID = "Activity instance id";
@@ -53,7 +53,7 @@ class EntityConverterTest {
 
   @BeforeAll
   static void init() {
-    context.setBusinessActivity(SOURCE_ACTIVITY);
+    context.setBusinessActivity(BUSINESS_ACTIVITY);
     context.setApplication(SOURCE_APPLICATION);
     context.setBusinessProcess(SOURCE_PROCESS);
     context.setSystem(SOURCE_SYSTEM);
@@ -88,7 +88,7 @@ class EntityConverterTest {
 
     assertThat(sysValuesMapped)
         .hasSize(10)
-        .containsEntry("business_activity", SOURCE_ACTIVITY)
+        .containsEntry("business_activity", BUSINESS_ACTIVITY)
         .containsEntry("source_system", SOURCE_SYSTEM)
         .containsEntry("source_process", SOURCE_PROCESS)
         .containsEntry("curr_user", USER_ID)

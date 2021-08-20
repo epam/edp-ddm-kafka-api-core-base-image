@@ -1,12 +1,17 @@
-package com.epam.digital.data.platform.kafkaapi.core.service;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
+import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.createSourceInfo;
+import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.createUserInfo;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
+import com.epam.digital.data.platform.kafkaapi.core.service.TraceProvider;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
 import com.epam.digital.data.platform.starter.audit.model.AuditEvent;
+import com.epam.digital.data.platform.starter.audit.model.AuditSourceInfo;
 import com.epam.digital.data.platform.starter.audit.model.EventType;
 import com.epam.digital.data.platform.starter.audit.service.AuditService;
 import com.epam.digital.data.platform.starter.security.jwt.TokenParser;
@@ -17,7 +22,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
-import java.util.Set;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,13 +37,9 @@ class KafkaEventsFacadeTest {
   private static final String APP_NAME = "application";
   private static final String REQUEST_ID = "1";
   private static final String METHOD_NAME = "method";
-  private static final String TABLE_NAME = "table";
   private static final String ACTION = "CREATE";
   private static final String STEP = "BEFORE";
-  private static final String USER_ID = "1010101014";
-  private static final String USER_NAME = "Сидоренко Василь Леонідович";
   private static final LocalDateTime CURR_TIME = LocalDateTime.of(2021, 4, 1, 11, 50);
-  private static final Set<String> FIELDS = Set.of("first", "second");
   private static final String RESULT = "RESULT";
 
   private static String ACCESS_TOKEN = "Token";
@@ -46,13 +47,17 @@ class KafkaEventsFacadeTest {
   private KafkaEventsFacade kafkaEventsFacade;
   private static JwtInfoProvider jwtInfoProvider;
 
-
   @Mock
   private AuditService auditService;
   @Mock
-  private TraceProvider traceProvider;
+  private AuditSourceInfoProvider auditSourceInfoProvider;
   @Mock
-  private Clock clock;
+  private TraceProvider traceProvider;
+
+  private final Clock clock =
+          Clock.fixed(CURR_TIME.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+
+  private AuditSourceInfo mockSourceInfo;
 
   @BeforeAll
   static void init() throws IOException {
@@ -63,12 +68,15 @@ class KafkaEventsFacadeTest {
 
   @BeforeEach
   void beforeEach() {
-    kafkaEventsFacade = new KafkaEventsFacade(
-        APP_NAME, auditService, clock, jwtInfoProvider, traceProvider);
+    kafkaEventsFacade =
+        new KafkaEventsFacade(
+            auditService, APP_NAME, clock, jwtInfoProvider, traceProvider, auditSourceInfoProvider);
 
     when(traceProvider.getRequestId()).thenReturn(REQUEST_ID);
-    when(clock.millis())
-        .thenReturn(CURR_TIME.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+    mockSourceInfo = createSourceInfo();
+    when(auditSourceInfoProvider.getAuditSourceInfo())
+            .thenReturn(mockSourceInfo);
   }
 
   @Test
@@ -85,14 +93,18 @@ class KafkaEventsFacadeTest {
     verify(auditService).sendAudit(auditEventCaptor.capture());
     AuditEvent actualEvent = auditEventCaptor.getValue();
 
-    assertThat(actualEvent.getRequestId()).isEqualTo(REQUEST_ID);
-    assertThat(actualEvent.getApplication()).isEqualTo(APP_NAME);
-    assertThat(actualEvent.getEventType()).isEqualTo(EventType.USER_ACTION);
-    assertThat(actualEvent.getCurrentTime()).isEqualTo(clock.millis());
-    assertThat(actualEvent.getUserId()).isNull();
-    assertThat(actualEvent.getUserName()).isNull();
-    assertThat(actualEvent.getName()).isEqualTo("Kafka request. Method: method");
-    assertThat(actualEvent.getContext()).isEqualTo(context);
+    var expectedEvent = AuditEvent.AuditEventBuilder.anAuditEvent()
+            .application(APP_NAME)
+            .name("Kafka request. Method: method")
+            .requestId(REQUEST_ID)
+            .sourceInfo(mockSourceInfo)
+            .userInfo(null)
+            .currentTime(clock.millis())
+            .eventType(EventType.USER_ACTION)
+            .context(context)
+            .build();
+
+    assertThat(actualEvent).usingRecursiveComparison().isEqualTo(expectedEvent);
   }
 
   @Test
@@ -109,14 +121,18 @@ class KafkaEventsFacadeTest {
     verify(auditService).sendAudit(auditEventCaptor.capture());
     AuditEvent actualEvent = auditEventCaptor.getValue();
 
-    assertThat(actualEvent.getRequestId()).isEqualTo(REQUEST_ID);
-    assertThat(actualEvent.getApplication()).isEqualTo(APP_NAME);
-    assertThat(actualEvent.getEventType()).isEqualTo(EventType.USER_ACTION);
-    assertThat(actualEvent.getCurrentTime()).isEqualTo(clock.millis());
-    assertThat(actualEvent.getUserId()).isEqualTo(USER_ID);
-    assertThat(actualEvent.getUserName()).isEqualTo(USER_NAME);
-    assertThat(actualEvent.getName()).isEqualTo("Kafka request. Method: method");
-    assertThat(actualEvent.getContext()).isEqualTo(context);
+    var expectedEvent = AuditEvent.AuditEventBuilder.anAuditEvent()
+            .application(APP_NAME)
+            .name("Kafka request. Method: method")
+            .requestId(REQUEST_ID)
+            .sourceInfo(mockSourceInfo)
+            .userInfo(createUserInfo())
+            .currentTime(clock.millis())
+            .eventType(EventType.USER_ACTION)
+            .context(context)
+            .build();
+
+    assertThat(actualEvent).usingRecursiveComparison().isEqualTo(expectedEvent);
   }
 
   private Request mockRequest(String jwt) {

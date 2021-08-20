@@ -1,4 +1,4 @@
-package com.epam.digital.data.platform.kafkaapi.core.aspect;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import com.epam.digital.data.platform.kafkaapi.core.exception.AuditException;
 import java.util.Arrays;

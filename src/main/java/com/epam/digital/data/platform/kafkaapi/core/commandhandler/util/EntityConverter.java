@@ -26,7 +26,7 @@ public class EntityConverter<T> {
   private static final String SOURCE_PROCESS = "source_process";
   private static final String PROCESS_DEFINITION_ID = "source_process_definition_id";
   private static final String PROCESS_INSTANCE_ID = "source_process_instance_id";
-  private static final String SOURCE_ACTIVITY = "business_activity";
+  private static final String BUSINESS_ACTIVITY = "business_activity";
   private static final String ACTIVITY_INSTANCE_ID = "source_activity_instance_id";
 
   private static final String DIGITAL_SIGNATURE = "digital_sign";
@@ -67,7 +67,7 @@ public class EntityConverter<T> {
       values.put(SOURCE_PROCESS, context.getBusinessProcess());
     }
     if (context.getBusinessActivity() != null) {
-      values.put(SOURCE_ACTIVITY, context.getBusinessActivity());
+      values.put(BUSINESS_ACTIVITY, context.getBusinessActivity());
     }
     if (context.getBusinessProcessDefinitionId() != null) {
       values.put(PROCESS_DEFINITION_ID, context.getBusinessProcessDefinitionId());

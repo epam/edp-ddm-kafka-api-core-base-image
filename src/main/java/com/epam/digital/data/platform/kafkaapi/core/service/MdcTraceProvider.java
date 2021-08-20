@@ -11,19 +11,4 @@ public class MdcTraceProvider implements TraceProvider {
   public String getRequestId() {
     return MDC.get(Header.TRACE_ID);
   }
-
-  @Override
-  public String getSourceSystem() {
-    return MDC.get(Header.X_SOURCE_SYSTEM);
-  }
-
-  @Override
-  public String getSourceBusinessId() {
-    return MDC.get(Header.X_SOURCE_BUSINESS_ID);
-  }
-
-  @Override
-  public String getSourceBusinessProcess() {
-    return MDC.get(Header.X_SOURCE_BUSINESS_PROCESS);
-  }
 }

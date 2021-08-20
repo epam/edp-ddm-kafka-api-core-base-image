@@ -1,4 +1,4 @@
-package com.epam.digital.data.platform.kafkaapi.core.aspect;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +17,6 @@ import com.epam.digital.data.platform.kafkaapi.core.exception.SqlErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.queryhandler.impl.QueryHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.searchhandler.impl.AbstractSearchHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
-import com.epam.digital.data.platform.kafkaapi.core.service.DatabaseEventsFacade;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.model.core.kafka.Request;

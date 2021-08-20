@@ -1,7 +1,6 @@
-package com.epam.digital.data.platform.kafkaapi.core.aspect;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import com.epam.digital.data.platform.kafkaapi.core.exception.AuditException;
-import com.epam.digital.data.platform.kafkaapi.core.service.KafkaEventsFacade;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;

@@ -1,9 +1,8 @@
-package com.epam.digital.data.platform.kafkaapi.core.aspect;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.exception.AuditException;
-import com.epam.digital.data.platform.kafkaapi.core.service.DatabaseEventsFacade;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.Request;
