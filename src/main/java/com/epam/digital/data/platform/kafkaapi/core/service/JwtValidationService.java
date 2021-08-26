@@ -36,7 +36,7 @@ public class JwtValidationService {
   private final Clock clock;
 
   public JwtValidationService(
-      @Value("${data-platform.jwt.validation.enabled:false}") boolean jwtValidationEnabled,
+      @Value("${data-platform.jwt.validation.enabled}") boolean jwtValidationEnabled,
       KeycloakConfigProperties keycloakConfigProperties,
       KeycloakRestClient keycloakRestClient, Clock clock) {
     this.jwtValidationEnabled = jwtValidationEnabled;

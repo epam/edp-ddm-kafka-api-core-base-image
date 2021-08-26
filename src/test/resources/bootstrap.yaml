@@ -2,3 +2,4 @@ spring:
   cloud:
     kubernetes:
       enabled: false
+
