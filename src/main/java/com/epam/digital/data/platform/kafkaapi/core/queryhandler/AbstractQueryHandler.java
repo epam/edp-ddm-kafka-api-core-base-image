@@ -3,20 +3,23 @@ package com.epam.digital.data.platform.kafkaapi.core.queryhandler;
 import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ForbiddenOperationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.SqlErrorException;
-import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
+import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
+import java.util.List;
+import java.util.Optional;
 import org.jooq.DSLContext;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.impl.DSL;
-
-import java.util.List;
-import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractQueryHandler<I, O> implements QueryHandler<I, O> {
+
+  private final Logger log = LoggerFactory.getLogger(AbstractQueryHandler.class);
 
   @Autowired
   protected DSLContext context;
@@ -32,6 +35,8 @@ public abstract class AbstractQueryHandler<I, O> implements QueryHandler<I, O> {
   @DatabaseAudit(Operation.READ)
   @Override
   public Optional<O> findById(Request<I> input) {
+    log.info("Reading from DB");
+
     JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
     if (!accessPermissionService.hasReadAccess(tableName(), userClaims, entityType())) {
       throw new ForbiddenOperationException("User has invalid role for search by ID");

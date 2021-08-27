@@ -44,32 +44,33 @@ public class ResponseMessageCreator {
     this.traceProvider = traceProvider;
   }
 
-  public <T> Message<Response<T>> createMessageByPayloadSize(Response<T> response) {
-    Response<T> returnedToUserResponse;
-    var serializedResponse = valueSerializer.serialize(null, response);
+  public <T> Message<Response<T>> createMessageByPayloadSize(Response<T> originalResponse) {
+    var response = new Response<T>();
+
+    var serializedResponse = valueSerializer.serialize(null, originalResponse);
     if (serializedResponse != null && serializedResponse.length >= messageSizeLimit) {
-      returnedToUserResponse = new Response<>();
+      log.info("Storing large response to Ceph");
+
       var cephContentKey = CEPH_MESSAGE_KEY_PREFIX + UUID.randomUUID();
       try {
         datafactoryResponseCephService.putContent(
             cephBucketName, cephContentKey, new String(serializedResponse, StandardCharsets.UTF_8));
-        return MessageBuilder.withPayload(returnedToUserResponse)
+        return MessageBuilder.withPayload(response)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, traceProvider.getRequestId())
                 .setHeader(ResponseHeaders.CEPH_RESPONSE_KEY, cephContentKey)
                 .build();
       } catch (CephCommunicationException e) {
         log.error("Exception while communication with ceph", e);
-        returnedToUserResponse = new Response<>();
-        returnedToUserResponse.setStatus(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
+        response.setStatus(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
       } catch (MisconfigurationException e) {
         log.error("Incorrect Ceph configuration", e);
-        returnedToUserResponse = new Response<>();
-        returnedToUserResponse.setStatus(Status.INTERNAL_CONTRACT_VIOLATION);
+        response.setStatus(Status.INTERNAL_CONTRACT_VIOLATION);
       }
     } else {
-      returnedToUserResponse = response;
+      response = originalResponse;
     }
-    return MessageBuilder.withPayload(returnedToUserResponse)
+
+    return MessageBuilder.withPayload(response)
             .setHeader(KafkaHeaders.MESSAGE_KEY, traceProvider.getRequestId())
             .build();
   }

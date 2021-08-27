@@ -47,8 +47,7 @@ public class EntityConverter<T> {
   }
 
   public Map<String, Object> entityToMap(T entity) {
-    TypeReference<Map<String, Object>> reference = new TypeReference<>() {
-    };
+    TypeReference<Map<String, Object>> reference = new TypeReference<>() {};
     Map<String, Object> entityMap = objectMapper.convertValue(entity, reference);
     entityMap.putAll(listsToStrings(entityMap));
     entityMap.putAll(mapsToStrings(entityMap));
@@ -63,6 +62,7 @@ public class EntityConverter<T> {
     values.put(CURR_USER, userId);
     values.put(SOURCE_SYSTEM, context.getSystem());
     values.put(SOURCE_APPLICATION, context.getApplication());
+
     if (context.getBusinessProcess() != null) {
       values.put(SOURCE_PROCESS, context.getBusinessProcess());
     }
@@ -90,6 +90,7 @@ public class EntityConverter<T> {
     if (securityContext.getDigitalSignatureDerivedChecksum() != null) {
       values.put(DIGITAL_SIGNATURE_DERIVED_CHECKSUM, securityContext.getDigitalSignatureDerivedChecksum());
     }
+
     return values;
   }
 

@@ -12,6 +12,8 @@ import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicat
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.MessageHandlingException;
 import org.springframework.messaging.support.GenericMessage;
@@ -19,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DigitalSignatureService {
+
+  private final Logger log = LoggerFactory.getLogger(DigitalSignatureService.class);
 
   private final CephService datafactoryCephService;
   private final String cephBucketName;
@@ -52,9 +56,14 @@ public class DigitalSignatureService {
           Status.INTERNAL_CONTRACT_VIOLATION);
     }
 
-    String signature;
+    String signature = getSignature(key);
+    return verify(signature, serialize(input));
+  }
+
+  private String getSignature(String key) {
     try {
-      signature =
+      log.info("Reading Signature from Ceph");
+      return
           datafactoryCephService
               .getContent(cephBucketName, key)
               .orElseThrow(
@@ -69,12 +78,11 @@ public class DigitalSignatureService {
       throw new ExternalCommunicationException(
           "Incorrect Ceph configuration", e, Status.INTERNAL_CONTRACT_VIOLATION);
     }
-
-    return verify(signature, serialize(input));
   }
 
   private boolean verify(String signature, String data) {
     try {
+      log.info("Verifying Signature");
       VerifyResponseDto responseDto =
           digitalSealRestClient.verify(new VerifyRequestDto(signature, data));
       return responseDto.isValid;

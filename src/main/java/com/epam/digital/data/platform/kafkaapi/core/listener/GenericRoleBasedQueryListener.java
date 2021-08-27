@@ -18,6 +18,8 @@ public abstract class GenericRoleBasedQueryListener<I, O> {
 
   public static final String DIGITAL_SEAL = "digital-seal";
 
+  private final Logger log = LoggerFactory.getLogger(GenericRoleBasedQueryListener.class);
+
   @Autowired
   private DigitalSignatureService signatureService;
   @Autowired
@@ -25,7 +27,7 @@ public abstract class GenericRoleBasedQueryListener<I, O> {
   @Autowired
   private ResponseMessageCreator responseMessageCreator;
 
-  private final Logger log = LoggerFactory.getLogger(GenericRoleBasedQueryListener.class);
+
   private final AbstractQueryHandler<I, O> queryHandler;
 
   protected GenericRoleBasedQueryListener(
@@ -35,6 +37,7 @@ public abstract class GenericRoleBasedQueryListener<I, O> {
 
   public Message<Response<O>> read(String key, Request<I> input) {
     Response<O> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
         return responseMessageCreator.createMessageByPayloadSize(response);
@@ -52,6 +55,7 @@ public abstract class GenericRoleBasedQueryListener<I, O> {
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
@@ -60,10 +64,12 @@ public abstract class GenericRoleBasedQueryListener<I, O> {
       response.setStatus(Status.JWT_INVALID);
       return false;
     }
+
     if (!signatureService.isSealValid(key, input)) {
       response.setStatus(Status.INVALID_SIGNATURE);
       return false;
     }
+
     return true;
   }
 }

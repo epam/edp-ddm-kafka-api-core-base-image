@@ -13,12 +13,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.postgresql.util.HStoreConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DmlOperationHandler {
 
   private static final String INSERT_ID_COLUMN = "f_row_insert";
+
+  private final Logger log = LoggerFactory.getLogger(DmlOperationHandler.class);
 
   private final DataSource dataSource;
 
@@ -28,6 +32,8 @@ public class DmlOperationHandler {
 
   @DatabaseAudit(Operation.CREATE)
   public String save(DmlOperationArgs args) {
+    log.info("Inserting into DB");
+
     try (Connection connection = dataSource.getConnection();
         CallableStatement statement = connection.prepareCall(DmlOperation.I.getSqlString())) {
       Array rolesDbArray = connection
@@ -36,6 +42,7 @@ public class DmlOperationHandler {
       statement.setString(2, HStoreConverter.toString(args.getSysValues()));
       statement.setString(3, HStoreConverter.toString(args.getBusinessValues()));
       statement.setArray(4, rolesDbArray);
+
       ResultSet resultSet = statement.executeQuery();
       if (resultSet.next()) {
         return resultSet.getString(INSERT_ID_COLUMN);
@@ -50,6 +57,8 @@ public class DmlOperationHandler {
 
   @DatabaseAudit(Operation.UPDATE)
   public void update(DmlOperationArgs args) {
+    log.info("Updating in DB");
+
     try (Connection connection = dataSource.getConnection();
         CallableStatement statement = connection.prepareCall(DmlOperation.U.getSqlString())) {
       Array rolesDbArray = connection
@@ -59,6 +68,7 @@ public class DmlOperationHandler {
       statement.setString(3, HStoreConverter.toString(args.getSysValues()));
       statement.setString(4, HStoreConverter.toString(args.getBusinessValues()));
       statement.setArray(5, rolesDbArray);
+
       statement.execute();
     } catch (SQLException e) {
       throw SQLExceptionResolverUtil.getDetailedExceptionFromSql(e);
@@ -67,6 +77,8 @@ public class DmlOperationHandler {
 
   @DatabaseAudit(Operation.DELETE)
   public void delete(DmlOperationArgs args) {
+    log.info("Deleting from DB");
+
     try (Connection connection = dataSource.getConnection();
         CallableStatement statement = connection.prepareCall(DmlOperation.D.getSqlString())) {
       Array rolesDbArray = connection
@@ -75,6 +87,7 @@ public class DmlOperationHandler {
       statement.setString(2, args.getEntityId());
       statement.setString(3, HStoreConverter.toString(args.getSysValues()));
       statement.setArray(4, rolesDbArray);
+
       statement.execute();
     } catch (SQLException e) {
       throw SQLExceptionResolverUtil.getDetailedExceptionFromSql(e);

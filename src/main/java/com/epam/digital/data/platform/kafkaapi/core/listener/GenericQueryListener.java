@@ -19,6 +19,13 @@ import org.springframework.messaging.Message;
 
 public abstract class GenericQueryListener<I, O> {
 
+  protected static final String DIGITAL_SEAL = "digital-seal";
+
+  private static final String INPUT_IS_INVALID = "Input is invalid";
+  private static final String EXCEPTION_WHILE_REQUEST_PROCESSING = "Exception while request processing";
+
+  private final Logger log = LoggerFactory.getLogger(GenericQueryListener.class);
+
   @Autowired
   private DigitalSignatureService signatureService;
   @Autowired
@@ -26,9 +33,6 @@ public abstract class GenericQueryListener<I, O> {
   @Autowired
   private ResponseMessageCreator responseMessageCreator;
 
-  public static final String DIGITAL_SEAL = "digital-seal";
-
-  private final Logger log = LoggerFactory.getLogger(GenericQueryListener.class);
   private final AbstractCommandHandler<O> commandHandler;
   private final AbstractQueryHandler<I, O> queryHandler;
 
@@ -41,25 +45,30 @@ public abstract class GenericQueryListener<I, O> {
 
   public Message<Response<EntityId>> create(String key, Request<O> input) {
     Response<EntityId> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
+        log.info(INPUT_IS_INVALID);
         return responseMessageCreator.createMessageByPayloadSize(response);
       }
 
       response.setPayload(commandHandler.save(input));
       response.setStatus(Status.CREATED);
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
   public Message<Response<O>> read(String key, Request<I> input) {
     Response<O> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
+        log.info(INPUT_IS_INVALID);
         return responseMessageCreator.createMessageByPayloadSize(response);
       }
 
@@ -71,45 +80,56 @@ public abstract class GenericQueryListener<I, O> {
         response.setStatus(Status.NOT_FOUND);
       }
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
   public Message<Response<Void>> update(String key, Request<O> input) {
     Response<Void> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
-        return responseMessageCreator.createMessageByPayloadSize(response);
+        log.info(INPUT_IS_INVALID);
+        return createResponse(response);
       }
 
       commandHandler.update(input);
       response.setStatus(Status.NO_CONTENT);
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
+    return createResponse(response);
+  }
+
+  private Message<Response<Void>> createResponse(Response<Void> response) {
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
   public Message<Response<Void>> delete(String key, Request<O> input) {
     Response<Void> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
-        return responseMessageCreator.createMessageByPayloadSize(response);
+        log.info(INPUT_IS_INVALID);
+        return createResponse(response);
       }
 
       commandHandler.delete(input);
       response.setStatus(Status.NO_CONTENT);
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
-    return responseMessageCreator.createMessageByPayloadSize(response);
+
+    return createResponse(response);
   }
 
   private <T, U> boolean isInputValid(String key, Request<T> input, Response<U> response) {
@@ -117,10 +137,12 @@ public abstract class GenericQueryListener<I, O> {
       response.setStatus(Status.JWT_INVALID);
       return false;
     }
+
     if (!signatureService.isSealValid(key, input)) {
       response.setStatus(Status.INVALID_SIGNATURE);
       return false;
     }
+
     return true;
   }
 }

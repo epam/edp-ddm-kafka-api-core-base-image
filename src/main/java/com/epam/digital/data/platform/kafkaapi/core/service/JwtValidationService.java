@@ -49,6 +49,7 @@ public class JwtValidationService {
     if (!jwtValidationEnabled) {
       return true;
     }
+
     String accessToken = getTokenFromInput(input);
     JWTClaimsSet jwtClaimsSet = getClaimsFromToken(accessToken);
     if (isExpiredJwt(jwtClaimsSet)) {
@@ -56,6 +57,7 @@ public class JwtValidationService {
     }
     String jwtIssuer = jwtClaimsSet.getIssuer();
     String issuerRealm = jwtIssuer.substring(jwtIssuer.lastIndexOf("/") + 1);
+
     if (keycloakConfigProperties.getRealms().contains(issuerRealm)) {
       PublicKey keycloakPublicKey = getPublicKeyFromKeycloak(issuerRealm);
       return isVerifiedToken(accessToken, keycloakPublicKey);
@@ -88,6 +90,8 @@ public class JwtValidationService {
 
   private PublicKey getPublicKeyFromKeycloak(String realm) {
     try {
+      log.info("Retrieving key from Keycloak");
+      log.debug("Realm: {}", realm);
       PublishedRealmRepresentation realmRepresentation = keycloakRestClient
           .getRealmRepresentation(realm);
       return realmRepresentation.getPublicKey();
@@ -104,7 +108,7 @@ public class JwtValidationService {
           .verify();
       return true;
     } catch (VerificationException e) {
-      log.error("JWT token is not verified", e);
+      log.error("JWT token is not valid", e);
       return false;
     }
   }

@@ -10,15 +10,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 @Component
 public class KafkaAuditProcessor implements AuditProcessor<Operation> {
 
-  private final Set<Status> auditableStatusToHandler =
+  private final Logger log = LoggerFactory.getLogger(KafkaAuditProcessor.class);
+
+  private static final Set<Status> auditableStatusToHandler =
       Set.of(Status.INVALID_SIGNATURE, Status.JWT_INVALID, Status.FORBIDDEN_OPERATION);
-  private final KafkaEventsFacade kafkaEventsFacade;
 
   private static final String CREATE = "KAFKA REQUEST CREATE";
   private static final String READ = "KAFKA REQUEST READ";
@@ -28,6 +31,8 @@ public class KafkaAuditProcessor implements AuditProcessor<Operation> {
 
   static final String BEFORE = "BEFORE";
   static final String AFTER = "AFTER";
+
+  private final KafkaEventsFacade kafkaEventsFacade;
 
   public KafkaAuditProcessor(KafkaEventsFacade kafkaEventsFacade) {
     this.kafkaEventsFacade = kafkaEventsFacade;
@@ -57,14 +62,19 @@ public class KafkaAuditProcessor implements AuditProcessor<Operation> {
 
     EventType eventType = EventType.USER_ACTION;
     String methodName = joinPoint.getSignature().getName();
+
+    log.info("Sending {} event to Audit", action);
     kafkaEventsFacade.sendKafkaAudit(eventType, methodName, request, action, BEFORE, null);
 
     Object result = joinPoint.proceed();
+
     var resultStatus = ((Message<Response<?>>) result).getPayload().getStatus();
 
     if (resultStatus != null && auditableStatusToHandler.contains(resultStatus)) {
       eventType = EventType.SECURITY_EVENT;
     }
+
+    log.info("Sending {} completed event to Audit", action);
     kafkaEventsFacade.sendKafkaAudit(
         eventType,
         methodName,

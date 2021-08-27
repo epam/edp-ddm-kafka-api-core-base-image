@@ -38,6 +38,7 @@ public abstract class AbstractCommandHandler<T> implements CommandHandler<T> {
     Map<String, Object> entityMap = entityConverter.entityToMap(input.getPayload());
     entityMap.remove(pkColumnName());
     Map<String, String> sysValues = entityConverter.buildSysValues(userClaims.getDrfo(), input);
+
     String id = dmlOperationHandler.save(
         DmlOperationArgs.builder(tableName(), userClaims, sysValues)
             .saveOperationArgs(entityMap)
@@ -68,6 +69,7 @@ public abstract class AbstractCommandHandler<T> implements CommandHandler<T> {
     JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
     String entityId = entityConverter.getUuidOfEntity(input.getPayload(), pkColumnName());
     Map<String, String> sysValues = entityConverter.buildSysValues(userClaims.getDrfo(), input);
+
     dmlOperationHandler.delete(
         DmlOperationArgs.builder(tableName(), userClaims, sysValues)
             .deleteOperationArgs(entityId)

@@ -46,6 +46,7 @@ public class AccessPermissionService<O> {
       statement.setArray(2, userRolesDbArray);
       statement.setString(3, SEARCH_TYPE_OPERATION);
       statement.setArray(4, searchFieldsDbArray);
+
       ResultSet rs = statement.executeQuery();
       if (rs.next()) {
         return rs.getBoolean(1);

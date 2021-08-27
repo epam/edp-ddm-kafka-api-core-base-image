@@ -15,7 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 
 public abstract class GenericRoleBasedCommandListener<I, O> {
-  public static final String DIGITAL_SEAL = "digital-seal";
+
+  protected static final String DIGITAL_SEAL = "digital-seal";
+
+  private static final String INPUT_IS_INVALID = "Input is invalid";
+  private static final String EXCEPTION_WHILE_REQUEST_PROCESSING = "Exception while request processing";
+
+  private final Logger log = LoggerFactory.getLogger(GenericRoleBasedCommandListener.class);
 
   @Autowired
   private DigitalSignatureService signatureService;
@@ -24,7 +30,6 @@ public abstract class GenericRoleBasedCommandListener<I, O> {
   @Autowired
   private ResponseMessageCreator responseMessageCreator;
 
-  private final Logger log = LoggerFactory.getLogger(GenericRoleBasedCommandListener.class);
   private final AbstractCommandHandler<O> commandHandler;
 
   protected GenericRoleBasedCommandListener(
@@ -34,52 +39,61 @@ public abstract class GenericRoleBasedCommandListener<I, O> {
 
   public Message<Response<EntityId>> create(String key, Request<O> input) {
     Response<EntityId> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
+        log.info(INPUT_IS_INVALID);
         return responseMessageCreator.createMessageByPayloadSize(response);
       }
 
       response.setPayload(commandHandler.save(input));
       response.setStatus(Status.CREATED);
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
   public Message<Response<Void>> update(String key, Request<O> input) {
     Response<Void> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
+        log.info(INPUT_IS_INVALID);
         return responseMessageCreator.createMessageByPayloadSize(response);
       }
 
       commandHandler.update(input);
       response.setStatus(Status.NO_CONTENT);
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
   public Message<Response<Void>> delete(String key, Request<O> input) {
     Response<Void> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
+        log.info(INPUT_IS_INVALID);
         return responseMessageCreator.createMessageByPayloadSize(response);
       }
 
       commandHandler.delete(input);
       response.setStatus(Status.NO_CONTENT);
     } catch (RequestProcessingException e) {
-      log.error("Exception while request processing", e);
+      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
@@ -88,10 +102,12 @@ public abstract class GenericRoleBasedCommandListener<I, O> {
       response.setStatus(Status.JWT_INVALID);
       return false;
     }
+
     if (!signatureService.isSealValid(key, input)) {
       response.setStatus(Status.INVALID_SIGNATURE);
       return false;
     }
+
     return true;
   }
 }

@@ -12,8 +12,8 @@
 
 	<properties>
 		<model.core.version>1.4.0-SNAPSHOT</model.core.version>
-		<ddm.starter.kafka.api.version>1.3.0-SNAPSHOT</ddm.starter.kafka.api.version>
-		<ddm.starter.logger.version>1.3.0-SNAPSHOT</ddm.starter.logger.version>
+		<ddm.starter.kafka.api.version>1.4.0-SNAPSHOT</ddm.starter.kafka.api.version>
+		<ddm.starter.logger.version>1.4.0-SNAPSHOT</ddm.starter.logger.version>
 		<ddm.starter.actuator.version>1.4.2-SNAPSHOT</ddm.starter.actuator.version>
 		<ddm.starter.audit.version>1.4.0-SNAPSHOT</ddm.starter.audit.version>
 		<ddm.starter.security.version>1.3.0-SNAPSHOT</ddm.starter.security.version>
@@ -78,7 +78,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.epam.digital.data.platform</groupId>
-			<artifactId>ddm-starter-logger</artifactId>
+			<artifactId>ddm-starter-logger2</artifactId>
 			<version>${ddm.starter.logger.version}</version>
 		</dependency>
 		<dependency>

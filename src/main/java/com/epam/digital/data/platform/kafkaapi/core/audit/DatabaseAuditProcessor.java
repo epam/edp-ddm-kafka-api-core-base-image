@@ -10,10 +10,14 @@ import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
 import java.util.Optional;
 import java.util.Set;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
+
+  private final Logger log = LoggerFactory.getLogger(DatabaseAuditProcessor.class);
 
   // action
   static final String CREATE = "INSERT INTO TABLE";
@@ -68,8 +72,10 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
 
   private Object findById(ProceedingJoinPoint joinPoint) throws Throwable {
     var request = getArgumentByType(joinPoint, Request.class);
+
     var userClaims = jwtInfoProvider.getUserClaims(request);
     var entityId = request.getPayload().toString();
+
     return prepareAndSendDbAudit(joinPoint, null, READ, userClaims, null, entityId);
   }
 
@@ -98,8 +104,10 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
 
   private Object search(ProceedingJoinPoint joinPoint) throws Throwable {
     var request = getArgumentByType(joinPoint, Request.class);
+
     JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(request);
     Set<String> fields = getFields(request.getPayload());
+
     return prepareAndSendDbAudit(joinPoint, null, SEARCH, userClaims, fields, null);
   }
 
@@ -108,6 +116,8 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
       Set<String> fields, String entityId) throws Throwable {
 
     String methodName = joinPoint.getSignature().getName();
+
+    log.info("Sending {} event to Audit", action);
     databaseEventsFacade
         .sendDbAudit(methodName, tableName, action, userClaims, BEFORE, entityId, fields, null);
 
@@ -119,6 +129,8 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
     if (action.equals(READ)) {
       fields = getFields(((Optional) result).orElse(null));
     }
+
+    log.info("Sending {} completed event to Audit", action);
     databaseEventsFacade
         .sendDbAudit(methodName, tableName, action, userClaims, AFTER, entityId, fields, null);
     return result;
@@ -129,10 +141,12 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
     if (dto == null) {
       return null;
     }
+
     Set<String> fields = entityConverter.entityToMap(dto).keySet();
     if (fields.isEmpty()) {
       fields = null;
     }
+
     return fields;
   }
 }

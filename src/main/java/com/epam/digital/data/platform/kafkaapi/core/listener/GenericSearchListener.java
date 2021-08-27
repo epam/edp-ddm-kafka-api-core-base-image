@@ -9,12 +9,17 @@ import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 
 public abstract class GenericSearchListener<I, O> {
 
   protected static final String DIGITAL_SEAL = GenericQueryListener.DIGITAL_SEAL;
+  private static final String INPUT_IS_INVALID = "Input is invalid";
+
+  private final Logger log = LoggerFactory.getLogger(GenericSearchListener.class);
 
   @Autowired
   private DigitalSignatureService signatureService;
@@ -31,10 +36,13 @@ public abstract class GenericSearchListener<I, O> {
 
   public Message<Response<List<O>>> search(String key, Request<I> input) {
     Response<List<O>> response = new Response<>();
+
     try {
       if (!isInputValid(key, input, response)) {
+        log.info(INPUT_IS_INVALID);
         return responseMessageCreator.createMessageByPayloadSize(response);
       }
+
       List<O> found = searchHandler.search(input);
       response.setPayload(found);
       response.setStatus(Status.SUCCESS);
@@ -42,6 +50,7 @@ public abstract class GenericSearchListener<I, O> {
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
+
     return responseMessageCreator.createMessageByPayloadSize(response);
   }
 
@@ -50,10 +59,12 @@ public abstract class GenericSearchListener<I, O> {
       response.setStatus(Status.JWT_INVALID);
       return false;
     }
+
     if (!signatureService.isSealValid(key, input)) {
       response.setStatus(Status.INVALID_SIGNATURE);
       return false;
     }
+
     return true;
   }
 }
