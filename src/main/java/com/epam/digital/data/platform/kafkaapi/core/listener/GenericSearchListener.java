@@ -47,6 +47,7 @@ public abstract class GenericSearchListener<I, O> {
       response.setPayload(found);
       response.setStatus(Status.SUCCESS);
     } catch (RequestProcessingException e) {
+      log.error("Exception while request processing", e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
     }
