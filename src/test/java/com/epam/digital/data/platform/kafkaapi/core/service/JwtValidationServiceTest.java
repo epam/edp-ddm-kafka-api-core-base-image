@@ -1,7 +1,6 @@
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
 import com.epam.digital.data.platform.kafkaapi.core.config.KeycloakConfigProperties;
-import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtExpiredException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtValidationException;
 import com.epam.digital.data.platform.model.core.kafka.Request;
@@ -11,10 +10,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +20,10 @@ import org.keycloak.representations.idm.PublishedRealmRepresentation;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -46,10 +46,14 @@ class JwtValidationServiceTest {
   @MockBean
   private Clock clock;
 
+  private KeyPair jwtSigningKeyPair;
+
   private JwtValidationService jwtValidationService;
 
   @BeforeEach
-  void beforeEach() {
+  void beforeEach() throws NoSuchAlgorithmException {
+    jwtSigningKeyPair = generateSigningKeyPair();
+
     jwtValidationService = new JwtValidationService(true, keycloakConfigProperties,
             keycloakRestClient, clock);
 
@@ -57,12 +61,17 @@ class JwtValidationServiceTest {
     when(clock.millis())
         .thenReturn(LocalDateTime.of(2021, 3, 1, 11, 50)
             .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+    var keycloakRealmRepresentation = new PublishedRealmRepresentation();
+    keycloakRealmRepresentation.setPublicKey(jwtSigningKeyPair.getPublic());
+    when(keycloakRestClient.getRealmRepresentation(REALM))
+        .thenReturn(keycloakRealmRepresentation);
   }
 
   @Test
   void expectOperationTokenVerifiedWhenProcessingDisabled() throws JOSEException {
     jwtValidationService = new JwtValidationService(false, keycloakConfigProperties,
             keycloakRestClient, clock);
+    jwtValidationService.postConstruct();
     Request<Void> input = mockRequest("", new Date());
 
     boolean actual = jwtValidationService.isValid(input);
@@ -74,6 +83,7 @@ class JwtValidationServiceTest {
   void expectExceptionWhenOperationWithNoToken() {
     jwtValidationService = new JwtValidationService(true, keycloakConfigProperties,
             keycloakRestClient, clock);
+    jwtValidationService.postConstruct();
     Request<Void> input = new Request<>();
 
     JwtValidationException e =
@@ -90,6 +100,7 @@ class JwtValidationServiceTest {
     Date tokenExp = Date.from(LocalDateTime.of(2021, 3, 1, 12, 0)
         .atZone(ZoneId.systemDefault()).toInstant());
     Request<Void> input = mockRequest("/" + REALM,  tokenExp);
+    jwtValidationService.postConstruct();
 
     boolean actual = jwtValidationService.isValid(input);
 
@@ -97,18 +108,16 @@ class JwtValidationServiceTest {
   }
 
   @Test
-  void expectThirdPartyUnavailableWhenRestCallException() throws JOSEException {
-    when(keycloakRestClient.getRealmRepresentation(REALM))
-        .thenThrow(new RuntimeException());
-
-    Date tokenExp = Date.from(LocalDateTime.of(2021, 3, 1, 12, 0)
-        .atZone(ZoneId.systemDefault()).toInstant());
+  void expectTokenIsValidWhenActualPublicKeyReturned()
+      throws JOSEException {
+    Date tokenExp =
+        Date.from(LocalDateTime.of(2021, 3, 1, 12, 0).atZone(ZoneId.systemDefault()).toInstant());
     Request<Void> input = mockRequest("/" + REALM, tokenExp);
+    jwtValidationService.postConstruct();
 
-    ExternalCommunicationException e = assertThrows(ExternalCommunicationException.class,
-        () -> jwtValidationService.isValid(input));
+    var actual = jwtValidationService.isValid(input);
 
-    assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
+    assertThat(actual).isTrue();
   }
 
   @Test
@@ -117,6 +126,7 @@ class JwtValidationServiceTest {
     Date tokenExp = Date.from(LocalDateTime.of(2021, 3, 1, 12, 0)
             .atZone(ZoneId.systemDefault()).toInstant());
     Request<Void> input = mockRequest("/wrongRealm", tokenExp);
+    jwtValidationService.postConstruct();
 
     JwtValidationException e = assertThrows(JwtValidationException.class,
             () -> jwtValidationService.isValid(input));
@@ -129,6 +139,7 @@ class JwtValidationServiceTest {
     Date tokenExp = Date.from(LocalDateTime.of(2021, 3, 1, 11, 45)
         .atZone(ZoneId.systemDefault()).toInstant());
     Request<Void> input = mockRequest("", tokenExp);
+    jwtValidationService.postConstruct();
 
     JwtExpiredException e = assertThrows(JwtExpiredException.class, () -> jwtValidationService.isValid(input));
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.JWT_EXPIRED);
@@ -144,19 +155,18 @@ class JwtValidationServiceTest {
   }
 
   private String mockJwt(String issuer, Date expirationTime) throws JOSEException {
-    ECKey key = new ECKeyGenerator(Curve.P_521)
-        .keyID("123")
-        .generate();
-    JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES512)
-        .type(JOSEObjectType.JWT)
-        .keyID(key.getKeyID())
-        .build();
-    JWTClaimsSet claims = new JWTClaimsSet.Builder()
-        .expirationTime(expirationTime)
-            .issuer(issuer)
-        .build();
+    JWSHeader header =
+        new JWSHeader.Builder(JWSAlgorithm.RS512).type(JOSEObjectType.JWT).keyID("123").build();
+    JWTClaimsSet claims =
+        new JWTClaimsSet.Builder().expirationTime(expirationTime).issuer(issuer).build();
     SignedJWT signedJWT = new SignedJWT(header, claims);
-    signedJWT.sign(new ECDSASigner(key.toECPrivateKey()));
+    signedJWT.sign(new RSASSASigner(jwtSigningKeyPair.getPrivate()));
     return signedJWT.serialize();
+  }
+
+  private KeyPair generateSigningKeyPair() throws NoSuchAlgorithmException {
+    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+    keyPairGenerator.initialize(2048);
+    return keyPairGenerator.generateKeyPair();
   }
 }

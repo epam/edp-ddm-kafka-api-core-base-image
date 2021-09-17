@@ -1,12 +1,10 @@
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
 import com.epam.digital.data.platform.kafkaapi.core.config.KeycloakConfigProperties;
-import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtExpiredException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtValidationException;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
-import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import org.keycloak.TokenVerifier;
@@ -18,11 +16,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.security.PublicKey;
 import java.text.ParseException;
 import java.time.Clock;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtValidationService {
@@ -35,6 +37,8 @@ public class JwtValidationService {
   private final KeycloakRestClient keycloakRestClient;
   private final Clock clock;
 
+  private Map<String, PublishedRealmRepresentation> allowedRealmsRepresentations;
+
   public JwtValidationService(
       @Value("${data-platform.jwt.validation.enabled}") boolean jwtValidationEnabled,
       KeycloakConfigProperties keycloakConfigProperties,
@@ -43,6 +47,17 @@ public class JwtValidationService {
     this.keycloakConfigProperties = keycloakConfigProperties;
     this.keycloakRestClient = keycloakRestClient;
     this.clock = clock;
+  }
+
+  @PostConstruct
+  void postConstruct() {
+    if (jwtValidationEnabled) {
+      allowedRealmsRepresentations =
+          keycloakConfigProperties.getRealms().stream()
+              .collect(
+                  Collectors.toMap(
+                      Function.identity(), keycloakRestClient::getRealmRepresentation));
+    }
   }
 
   public <O> boolean isValid(Request<O> input) {
@@ -59,7 +74,7 @@ public class JwtValidationService {
     String issuerRealm = jwtIssuer.substring(jwtIssuer.lastIndexOf("/") + 1);
 
     if (keycloakConfigProperties.getRealms().contains(issuerRealm)) {
-      PublicKey keycloakPublicKey = getPublicKeyFromKeycloak(issuerRealm);
+      PublicKey keycloakPublicKey = allowedRealmsRepresentations.get(issuerRealm).getPublicKey();
       return isVerifiedToken(accessToken, keycloakPublicKey);
     } else {
       throw new JwtValidationException("Issuer realm is not valid");
@@ -86,19 +101,6 @@ public class JwtValidationService {
     return Optional.of(jwtClaimsSet.getExpirationTime())
         .map(now::after)
         .orElse(true);
-  }
-
-  private PublicKey getPublicKeyFromKeycloak(String realm) {
-    try {
-      log.info("Retrieving key from Keycloak");
-      log.debug("Realm: {}", realm);
-      PublishedRealmRepresentation realmRepresentation = keycloakRestClient
-          .getRealmRepresentation(realm);
-      return realmRepresentation.getPublicKey();
-    } catch (Exception e) {
-      throw new ExternalCommunicationException("Cannot get public key from keycloak",
-          e, Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
-    }
   }
 
   private boolean isVerifiedToken(String accessToken, PublicKey publicKey) {
