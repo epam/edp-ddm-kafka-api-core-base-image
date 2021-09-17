@@ -58,6 +58,10 @@ public abstract class GenericQueryListener<I, O> {
       log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
+    } catch (Exception e) {
+      log.error("Unexpected exception while executing the 'create' method", e);
+      response.setStatus(Status.OPERATION_FAILED);
+      response.setDetails("Unexpected exception while executing the 'create' method");
     }
 
     return responseMessageCreator.createMessageByPayloadSize(response);
@@ -83,6 +87,10 @@ public abstract class GenericQueryListener<I, O> {
       log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
+    } catch (Exception e) {
+      log.error("Unexpected exception while executing the 'read' method", e);
+      response.setStatus(Status.OPERATION_FAILED);
+      response.setDetails("Unexpected exception while executing the 'read' method");
     }
 
     return responseMessageCreator.createMessageByPayloadSize(response);
@@ -103,6 +111,10 @@ public abstract class GenericQueryListener<I, O> {
       log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
+    } catch (Exception e) {
+      log.error("Unexpected exception while executing the 'update' method", e);
+      response.setStatus(Status.OPERATION_FAILED);
+      response.setDetails("Unexpected exception while executing the 'update' method");
     }
 
     return createResponse(response);
@@ -127,6 +139,10 @@ public abstract class GenericQueryListener<I, O> {
       log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
+    } catch (Exception e) {
+      log.error("Unexpected exception while executing the 'delete' method", e);
+      response.setStatus(Status.OPERATION_FAILED);
+      response.setDetails("Unexpected exception while executing the 'delete' method");
     }
 
     return createResponse(response);

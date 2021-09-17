@@ -12,6 +12,7 @@ import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicat
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,6 +95,11 @@ public class DigitalSignatureService {
     } catch (InternalServerErrorException e) {
       throw new ExternalCommunicationException(
           "External digital signature service has internal server error",
+          e,
+          Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
+    } catch (RetryableException e) {
+      throw new ExternalCommunicationException(
+          "External digital signature service not responding",
           e,
           Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
     }

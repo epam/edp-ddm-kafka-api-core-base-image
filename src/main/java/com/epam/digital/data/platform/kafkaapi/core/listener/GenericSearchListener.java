@@ -50,6 +50,10 @@ public abstract class GenericSearchListener<I, O> {
       log.error("Exception while request processing", e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
+    } catch (Exception e) {
+      log.error("Unexpected exception while executing the 'delete' method", e);
+      response.setStatus(Status.OPERATION_FAILED);
+      response.setDetails("Unexpected exception while executing the 'delete' method");
     }
 
     return responseMessageCreator.createMessageByPayloadSize(response);

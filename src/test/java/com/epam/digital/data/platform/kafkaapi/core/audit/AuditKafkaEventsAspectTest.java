@@ -74,12 +74,13 @@ class AuditKafkaEventsAspectTest {
   }
 
   @Test
-  void expectAuditAspectOnlyBeforeWhenExceptionOnCreateMethod() {
+  void expectAuditAspectBeforeAndAfterCreateMethodWhenAnyException() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class, () -> genericQueryListener.create("", new Request()));
+    genericQueryListener.create("", new Request());
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade, times(2))
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -92,12 +93,13 @@ class AuditKafkaEventsAspectTest {
   }
 
   @Test
-  void expectAuditAspectOnlyBeforeWhenExceptionOnReadMethod() {
+  void expectAuditAspectBeforeAndAfterReadMethodWhenAnyException() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class, () -> genericQueryListener.read("", new Request()));
+    genericQueryListener.read("", new Request());
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade, times(2))
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -110,12 +112,13 @@ class AuditKafkaEventsAspectTest {
   }
 
   @Test
-  void expectAuditAspectOnlyBeforeWhenExceptionOnUpdateMethod() {
+  void expectAuditAspectBeforeAndAfterUpdateMethodWhenAnyException() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class, () -> genericQueryListener.update("", new Request()));
+    genericQueryListener.update("", new Request());
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade, times(2))
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -128,12 +131,13 @@ class AuditKafkaEventsAspectTest {
   }
 
   @Test
-  void expectAuditAspectOnlyBeforeWhenExceptionOnDeleteMethod() {
+  void expectAuditAspectBeforeAndAfterDeleteMethodWhenAnyException() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class, () -> genericQueryListener.delete("", new Request()));
+    genericQueryListener.delete("", new Request());
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade, times(2))
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 
   @Test
@@ -146,13 +150,12 @@ class AuditKafkaEventsAspectTest {
   }
 
   @Test
-  void expectAuditAspectOnlyBeforeWhenExceptionOnSearchMethod() {
+  void expectAuditAspectBeforeAndAfterSearchMethodWhenAnyException() {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
-    assertThrows(RuntimeException.class,
-        () -> genericSearchListener
-            .search("", new Request<>(new MockEntityContains(), null, null)));
+    genericSearchListener.search("", new Request<>(new MockEntityContains(), null, null));
 
-    verify(kafkaEventsFacade).sendKafkaAudit(any(), any(), any(), any(), any(), any());
+    verify(kafkaEventsFacade, times(2))
+        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
   }
 }

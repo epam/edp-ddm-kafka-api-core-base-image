@@ -65,6 +65,9 @@ public class ResponseMessageCreator {
       } catch (MisconfigurationException e) {
         log.error("Incorrect Ceph configuration", e);
         response.setStatus(Status.INTERNAL_CONTRACT_VIOLATION);
+      } catch (Exception e) {
+        log.error("Can not store large response", e);
+        response.setStatus(Status.OPERATION_FAILED);
       }
     } else {
       response = originalResponse;
