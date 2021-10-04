@@ -63,7 +63,7 @@ public class KafkaAuditProcessor implements AuditProcessor<Operation> {
     EventType eventType = EventType.USER_ACTION;
     String methodName = joinPoint.getSignature().getName();
 
-    log.info("Sending {} event to Audit", action);
+    log.debug("Sending {} event to Audit", action);
     kafkaEventsFacade.sendKafkaAudit(eventType, methodName, request, action, BEFORE, null);
 
     Object result = joinPoint.proceed();
@@ -74,7 +74,7 @@ public class KafkaAuditProcessor implements AuditProcessor<Operation> {
       eventType = EventType.SECURITY_EVENT;
     }
 
-    log.info("Sending {} completed event to Audit", action);
+    log.debug("Sending {} completed event to Audit", action);
     kafkaEventsFacade.sendKafkaAudit(
         eventType,
         methodName,

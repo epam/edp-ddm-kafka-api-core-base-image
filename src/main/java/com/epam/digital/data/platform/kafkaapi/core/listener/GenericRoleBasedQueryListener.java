@@ -54,6 +54,10 @@ public abstract class GenericRoleBasedQueryListener<I, O> {
       log.error("Exception while request processing", e);
       response.setStatus(e.getKafkaResponseStatus());
       response.setDetails(e.getDetails());
+    } catch (Exception e) {
+      log.error("Unexpected exception while executing the 'read' method", e);
+      response.setStatus(Status.OPERATION_FAILED);
+      response.setDetails("Unexpected exception while executing the 'read' method");
     }
 
     return responseMessageCreator.createMessageByPayloadSize(response);

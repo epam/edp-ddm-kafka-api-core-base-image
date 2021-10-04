@@ -117,7 +117,7 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
 
     String methodName = joinPoint.getSignature().getName();
 
-    log.info("Sending {} event to Audit", action);
+    log.debug("Sending {} event to Audit", action);
     databaseEventsFacade
         .sendDbAudit(methodName, tableName, action, userClaims, BEFORE, entityId, fields, null);
 
@@ -130,7 +130,7 @@ public class DatabaseAuditProcessor implements AuditProcessor<Operation> {
       fields = getFields(((Optional) result).orElse(null));
     }
 
-    log.info("Sending {} completed event to Audit", action);
+    log.debug("Sending {} completed event to Audit", action);
     databaseEventsFacade
         .sendDbAudit(methodName, tableName, action, userClaims, AFTER, entityId, fields, null);
     return result;

@@ -10,7 +10,6 @@ import org.jooq.DSLContext;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.impl.DSL;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractSearchHandler<I, O> implements SearchHandler<I, O> {
