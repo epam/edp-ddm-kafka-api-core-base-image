@@ -1,6 +1,6 @@
 package com.epam.digital.data.platform.kafkaapi.core.audit;
 
-import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit;
+import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.annotation.KafkaAudit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -21,10 +21,10 @@ public class AuditAspect {
     this.kafkaAuditProcessor = kafkaAuditProcessor;
   }
 
-  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit)")
+  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation)")
   Object databaseAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
     var signature = (MethodSignature) joinPoint.getSignature();
-    var annotation = signature.getMethod().getAnnotation(DatabaseAudit.class);
+    var annotation = signature.getMethod().getAnnotation(DatabaseOperation.class);
     var operation = annotation.value();
     return databaseAuditProcessor.process(joinPoint, operation);
   }

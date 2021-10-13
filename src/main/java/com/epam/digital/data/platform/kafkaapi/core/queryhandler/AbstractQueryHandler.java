@@ -1,6 +1,6 @@
 package com.epam.digital.data.platform.kafkaapi.core.queryhandler;
 
-import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit;
+import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ForbiddenOperationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.SqlErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
@@ -32,7 +32,7 @@ public abstract class AbstractQueryHandler<I, O> implements QueryHandler<I, O> {
     this.accessPermissionService = accessPermissionService;
   }
 
-  @DatabaseAudit(Operation.READ)
+  @DatabaseOperation(Operation.READ)
   @Override
   public Optional<O> findById(Request<I> input) {
     log.info("Reading from DB");

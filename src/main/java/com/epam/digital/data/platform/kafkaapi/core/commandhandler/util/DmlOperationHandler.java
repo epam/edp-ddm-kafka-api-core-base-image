@@ -1,6 +1,6 @@
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler.util;
 
-import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseAudit;
+import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ProcedureErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.util.JwtClaimsUtils;
@@ -30,7 +30,7 @@ public class DmlOperationHandler {
     this.dataSource = dataSource;
   }
 
-  @DatabaseAudit(Operation.CREATE)
+  @DatabaseOperation(Operation.CREATE)
   public String save(DmlOperationArgs args) {
     log.info("Inserting into DB");
 
@@ -55,7 +55,7 @@ public class DmlOperationHandler {
     }
   }
 
-  @DatabaseAudit(Operation.UPDATE)
+  @DatabaseOperation(Operation.UPDATE)
   public void update(DmlOperationArgs args) {
     log.info("Updating in DB");
 
@@ -75,7 +75,7 @@ public class DmlOperationHandler {
     }
   }
 
-  @DatabaseAudit(Operation.DELETE)
+  @DatabaseOperation(Operation.DELETE)
   public void delete(DmlOperationArgs args) {
     log.info("Deleting from DB");
 
