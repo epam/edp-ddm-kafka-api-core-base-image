@@ -2,7 +2,6 @@ package com.epam.digital.data.platform.kafkaapi.core.listener;
 
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.exception.RequestProcessingException;
-import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;
 import com.epam.digital.data.platform.kafkaapi.core.service.DigitalSignatureService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtValidationService;
 import com.epam.digital.data.platform.kafkaapi.core.service.ResponseMessageCreator;
@@ -12,8 +11,6 @@ import com.epam.digital.data.platform.model.core.kafka.Response;
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 
@@ -34,13 +31,10 @@ public abstract class GenericQueryListener<I, O> {
   private ResponseMessageCreator responseMessageCreator;
 
   private final AbstractCommandHandler<O> commandHandler;
-  private final AbstractQueryHandler<I, O> queryHandler;
 
   protected GenericQueryListener(
-      AbstractCommandHandler<O> commandHandler,
-      AbstractQueryHandler<I, O> queryHandler) {
+      AbstractCommandHandler<O> commandHandler) {
     this.commandHandler = commandHandler;
-    this.queryHandler = queryHandler;
   }
 
   public Message<Response<EntityId>> create(String key, Request<O> input) {
@@ -62,35 +56,6 @@ public abstract class GenericQueryListener<I, O> {
       log.error("Unexpected exception while executing the 'create' method", e);
       response.setStatus(Status.OPERATION_FAILED);
       response.setDetails("Unexpected exception while executing the 'create' method");
-    }
-
-    return responseMessageCreator.createMessageByPayloadSize(response);
-  }
-
-  public Message<Response<O>> read(String key, Request<I> input) {
-    Response<O> response = new Response<>();
-
-    try {
-      if (!isInputValid(key, input, response)) {
-        log.info(INPUT_IS_INVALID);
-        return responseMessageCreator.createMessageByPayloadSize(response);
-      }
-
-      Optional<O> consent = queryHandler.findById(input);
-      if (consent.isPresent()) {
-        response.setPayload(consent.get());
-        response.setStatus(Status.SUCCESS);
-      } else {
-        response.setStatus(Status.NOT_FOUND);
-      }
-    } catch (RequestProcessingException e) {
-      log.error(EXCEPTION_WHILE_REQUEST_PROCESSING, e);
-      response.setStatus(e.getKafkaResponseStatus());
-      response.setDetails(e.getDetails());
-    } catch (Exception e) {
-      log.error("Unexpected exception while executing the 'read' method", e);
-      response.setStatus(Status.OPERATION_FAILED);
-      response.setDetails("Unexpected exception while executing the 'read' method");
     }
 
     return responseMessageCreator.createMessageByPayloadSize(response);

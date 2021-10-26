@@ -1,24 +1,17 @@
 package com.epam.digital.data.platform.kafkaapi.core.audit;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.epam.digital.data.platform.kafkaapi.core.audit.AuditAspect;
-import com.epam.digital.data.platform.kafkaapi.core.audit.DatabaseAuditProcessor;
-import com.epam.digital.data.platform.kafkaapi.core.audit.KafkaAuditProcessor;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericQueryListenerTestImpl;
-import com.epam.digital.data.platform.kafkaapi.core.listener.search.impl.GenericSearchListenerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;
 import com.epam.digital.data.platform.kafkaapi.core.searchhandler.AbstractSearchHandler;
 import com.epam.digital.data.platform.kafkaapi.core.service.DigitalSignatureService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtValidationService;
-import com.epam.digital.data.platform.kafkaapi.core.audit.KafkaEventsFacade;
 import com.epam.digital.data.platform.kafkaapi.core.service.ResponseMessageCreator;
-import com.epam.digital.data.platform.kafkaapi.core.util.MockEntityContains;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +28,7 @@ import org.springframework.messaging.support.MessageBuilder;
     classes = {
         AuditAspect.class,
         KafkaAuditProcessor.class,
-        GenericQueryListenerTestImpl.class,
-        GenericSearchListenerTestImpl.class
+        GenericQueryListenerTestImpl.class
     })
 @MockBean(DatabaseAuditProcessor.class)
 @MockBean(AbstractSearchHandler.class)
@@ -46,8 +38,6 @@ class AuditKafkaEventsAspectTest {
 
   @Autowired
   private GenericQueryListenerTestImpl genericQueryListener;
-  @Autowired
-  private GenericSearchListenerTestImpl genericSearchListener;
 
   @MockBean
   private KafkaEventsFacade kafkaEventsFacade;
@@ -78,25 +68,6 @@ class AuditKafkaEventsAspectTest {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
     genericQueryListener.create("", new Request());
-
-    verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
-  }
-
-  @Test
-  void expectAuditAspectBeforeAndAfterReadMethodWhenNoException() {
-
-    genericQueryListener.read("", new Request());
-
-    verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
-  }
-
-  @Test
-  void expectAuditAspectBeforeAndAfterReadMethodWhenAnyException() {
-    when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
-
-    genericQueryListener.read("", new Request());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
@@ -135,25 +106,6 @@ class AuditKafkaEventsAspectTest {
     when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
 
     genericQueryListener.delete("", new Request());
-
-    verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
-  }
-
-  @Test
-  void expectAuditAspectBeforeAndAfterSearchMethodWhenNoException() {
-
-    genericSearchListener.search("", new Request<>(new MockEntityContains(), null, null));
-
-    verify(kafkaEventsFacade, times(2))
-        .sendKafkaAudit(any(), any(), any(), any(), any(), any());
-  }
-
-  @Test
-  void expectAuditAspectBeforeAndAfterSearchMethodWhenAnyException() {
-    when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
-
-    genericSearchListener.search("", new Request<>(new MockEntityContains(), null, null));
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());

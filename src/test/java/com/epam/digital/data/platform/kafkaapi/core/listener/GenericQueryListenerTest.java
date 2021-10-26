@@ -1,18 +1,25 @@
 package com.epam.digital.data.platform.kafkaapi.core.listener;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ExternalCommunicationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtValidationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ProcedureErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericQueryListenerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.queryhandler.impl.QueryHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.service.DigitalSignatureService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtValidationService;
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.service.ResponseMessageCreator;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
-import com.epam.digital.data.platform.kafkaapi.core.queryhandler.impl.QueryHandlerTestImpl;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
 import com.epam.digital.data.platform.model.core.kafka.Status;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,15 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = GenericQueryListenerTestImpl.class)
 class GenericQueryListenerTest {
@@ -64,58 +62,6 @@ class GenericQueryListenerTest {
 
     when(responseMessageCreator.createMessageByPayloadSize(any()))
             .thenReturn(MessageBuilder.withPayload(new Response<>()).build());
-  }
-
-  @Test
-  @DisplayName("Check if response is failed on record not found")
-  void notFound() {
-    when(mockQueryHandler.findById(any())).thenReturn(Optional.empty());
-
-    queryListener.read(KEY, mockInput());
-
-    verify(responseMessageCreator).createMessageByPayloadSize(responseWithPayloadCaptor.capture());
-    var response = responseWithPayloadCaptor.getValue();
-    assertThat(response.getPayload()).isNull();
-    assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND);
-  }
-
-  @Test
-  @DisplayName("Check if status is correct if entity found")
-  void happyReadPath() {
-    MockEntity mock = new MockEntity();
-    mock.setConsentId(ENTITY_ID);
-    mock.setPersonFullName("stub");
-    when(mockQueryHandler.findById(any())).thenReturn(Optional.of(mock));
-
-    var mockResponse = new Response<>();
-    mockResponse.setPayload(mock);
-    when(responseMessageCreator.createMessageByPayloadSize(any()))
-            .thenReturn(MessageBuilder.withPayload(mockResponse).build());
-
-    Response<MockEntity> actualResponse = queryListener.read(KEY, mockInput()).getPayload();
-
-    verify(responseMessageCreator).createMessageByPayloadSize(responseWithPayloadCaptor.capture());
-    var plainResponse = responseWithPayloadCaptor.getValue();
-    assertThat(plainResponse.getPayload()).isEqualTo(mock);
-    assertThat(plainResponse.getStatus()).isEqualTo(Status.SUCCESS);
-
-    assertThat(actualResponse).isEqualTo(mockResponse);
-  }
-
-  @Test
-  void expectJwtInvalidStatusOnReadIfValidationNotPassed() {
-    when(jwtValidationService.isValid(any())).thenReturn(false);
-    MockEntity mock = new MockEntity();
-    mock.setConsentId(ENTITY_ID);
-    mock.setPersonFullName("stub");
-    when(mockQueryHandler.findById(any())).thenReturn(Optional.of(mock));
-
-    queryListener.read(KEY, mockInput());
-
-    verify(responseMessageCreator).createMessageByPayloadSize(responseWithPayloadCaptor.capture());
-    var response = responseWithPayloadCaptor.getValue();
-    assertThat(response.getStatus()).isEqualTo(Status.JWT_INVALID);
-    assertThat(response.getDetails()).isNull();
   }
 
   @Test
