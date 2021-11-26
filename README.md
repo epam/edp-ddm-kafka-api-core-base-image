@@ -15,3 +15,6 @@ This library contains **all** the business logic of the Kafka API microservice w
 
 # Deployment
 The library is delivered as a docker image with all dependencies inside.
+
+### License
+kafka-api-core is Open Source software released under the Apache 2.0 license.
