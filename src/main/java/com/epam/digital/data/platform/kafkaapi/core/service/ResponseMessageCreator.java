@@ -69,7 +69,7 @@ public class ResponseMessageCreator {
 
       var cephContentKey = CEPH_MESSAGE_KEY_PREFIX + UUID.randomUUID();
       try {
-        datafactoryResponseCephService.putContent(
+        datafactoryResponseCephService.put(
             cephBucketName, cephContentKey, new String(serializedResponse, StandardCharsets.UTF_8));
         return MessageBuilder.withPayload(response)
                 .setHeader(KafkaHeaders.MESSAGE_KEY, traceProvider.getRequestId())

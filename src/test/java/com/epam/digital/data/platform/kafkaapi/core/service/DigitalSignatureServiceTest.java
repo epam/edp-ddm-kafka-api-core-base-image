@@ -71,7 +71,7 @@ class DigitalSignatureServiceTest {
   @BeforeEach
   void init() {
     MockitoAnnotations.initMocks(this);
-    when(cephService.getContent(BUCKET, KEY)).thenReturn(Optional.of(SIGNATURE));
+    when(cephService.getAsString(BUCKET, KEY)).thenReturn(Optional.of(SIGNATURE));
     digitalSignatureService = new DigitalSignatureService(cephService, BUCKET,
         digitalSealRestClient, objectMapper, true);
     request = new Request<>(getMockPayload(), null, null);
@@ -99,7 +99,7 @@ class DigitalSignatureServiceTest {
 
   @Test
   void cephCommunicationExceptionChangedToExternalCommunicationException() {
-    when(cephService.getContent(any(), any())).thenThrow(CephCommunicationException.class);
+    when(cephService.getAsString(any(), any())).thenThrow(CephCommunicationException.class);
     var actualException = assertThrows(ExternalCommunicationException.class,
         () -> digitalSignatureService.isSealValid(KEY, request));
     assertThat(actualException.getKafkaResponseStatus()).isEqualTo(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
@@ -107,7 +107,7 @@ class DigitalSignatureServiceTest {
 
   @Test
   void externalCommunicationExceptionWhenNotFoundCephContent() {
-    when(cephService.getContent(any(), any())).thenReturn(Optional.empty());
+    when(cephService.getAsString(any(), any())).thenReturn(Optional.empty());
     var actualException = assertThrows(ExternalCommunicationException.class,
             () -> digitalSignatureService.isSealValid(KEY, request));
     assertThat(actualException.getKafkaResponseStatus()).isEqualTo(Status.INTERNAL_CONTRACT_VIOLATION);
@@ -115,7 +115,7 @@ class DigitalSignatureServiceTest {
 
   @Test
   void misconfigurationExceptionChangedToExternalCommunicationException() {
-    when(cephService.getContent(any(), any())).thenThrow(MisconfigurationException.class);
+    when(cephService.getAsString(any(), any())).thenThrow(MisconfigurationException.class);
     assertThrows(ExternalCommunicationException.class,
         () -> digitalSignatureService.isSealValid(KEY, request));
   }

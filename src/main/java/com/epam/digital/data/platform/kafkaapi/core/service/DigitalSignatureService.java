@@ -82,7 +82,7 @@ public class DigitalSignatureService {
       log.info("Reading Signature from Ceph");
       return
           datafactoryCephService
-              .getContent(cephBucketName, key)
+              .getAsString(cephBucketName, key)
               .orElseThrow(
                   () ->
                       new ExternalCommunicationException(

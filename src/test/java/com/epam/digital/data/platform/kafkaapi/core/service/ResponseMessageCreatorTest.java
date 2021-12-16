@@ -85,7 +85,7 @@ class ResponseMessageCreatorTest {
     var actualResponseMessage =
             responseMessageCreator.createMessageByPayloadSize(responseToProcess);
 
-    verify(cephService).putContent(eq(BUCKET_NAME), any(), eq(serializedResponseStr));
+    verify(cephService).put(eq(BUCKET_NAME), any(), eq(serializedResponseStr));
 
     assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY)).isEqualTo(REQUEST_ID);
     assertThat(actualResponseMessage.getHeaders().get(ResponseHeaders.CEPH_RESPONSE_KEY)).isNotNull();
@@ -102,7 +102,7 @@ class ResponseMessageCreatorTest {
     when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
     doThrow(new CephCommunicationException("", new RuntimeException()))
         .when(cephService)
-        .putContent(any(), any(), any());
+        .put(any(), any(), any());
 
     var actualResponseMessage =
             responseMessageCreator.createMessageByPayloadSize(responseToProcess);
@@ -122,7 +122,7 @@ class ResponseMessageCreatorTest {
     when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
     doThrow(new MisconfigurationException(""))
             .when(cephService)
-            .putContent(any(), any(), any());
+            .put(any(), any(), any());
 
     var actualResponseMessage =
             responseMessageCreator.createMessageByPayloadSize(responseToProcess);
