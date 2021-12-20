@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DatabaseEventsFacade extends AbstractAuditFacade {
 
-  static final String DB_MODIFYING = "DB request. Method: ";
+  private static final String DB_MODIFYING = "DB request. Method: ";
 
   private final TraceProvider traceProvider;
   private final AuditSourceInfoProvider auditSourceInfoProvider;

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.epam.digital.data.platform.kafkaapi.core.aspect.AuditAspect;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericQueryListenerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;

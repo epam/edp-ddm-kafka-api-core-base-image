@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.epam.digital.data.platform.kafkaapi.core.aspect.AuditAspect;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;

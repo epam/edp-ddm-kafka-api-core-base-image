@@ -24,7 +24,7 @@ import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.integration.ceph.model.CephObject;
 import com.epam.digital.data.platform.integration.ceph.model.CephObjectMetadata;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
-import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation;
+import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,7 +158,7 @@ class ExecutionTimeLoggingAspectTest {
   @TestComponent
   static class MockDbClient {
 
-    @DatabaseOperation(Operation.CREATE)
+    @AuditableDatabaseOperation(Operation.CREATE)
     public void save() {}
   }
 

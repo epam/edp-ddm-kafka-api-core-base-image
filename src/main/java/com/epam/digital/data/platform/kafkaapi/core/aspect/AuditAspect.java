@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.kafkaapi.core.audit;
+package com.epam.digital.data.platform.kafkaapi.core.aspect;
 
-import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation;
-import com.epam.digital.data.platform.kafkaapi.core.annotation.KafkaAudit;
+import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableListener;
+import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation;
+import com.epam.digital.data.platform.kafkaapi.core.audit.DatabaseAuditProcessor;
+import com.epam.digital.data.platform.kafkaapi.core.audit.KafkaAuditProcessor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -37,18 +39,18 @@ public class AuditAspect {
     this.kafkaAuditProcessor = kafkaAuditProcessor;
   }
 
-  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation)")
+  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation)")
   Object databaseAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
     var signature = (MethodSignature) joinPoint.getSignature();
-    var annotation = signature.getMethod().getAnnotation(DatabaseOperation.class);
+    var annotation = signature.getMethod().getAnnotation(AuditableDatabaseOperation.class);
     var operation = annotation.value();
     return databaseAuditProcessor.process(joinPoint, operation);
   }
 
-  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.annotation.KafkaAudit)")
+  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.audit.AuditableListener)")
   Object kafkaAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
     var signature = (MethodSignature) joinPoint.getSignature();
-    var annotation = signature.getMethod().getAnnotation(KafkaAudit.class);
+    var annotation = signature.getMethod().getAnnotation(AuditableListener.class);
     var operation = annotation.value();
     return kafkaAuditProcessor.process(joinPoint, operation);
   }

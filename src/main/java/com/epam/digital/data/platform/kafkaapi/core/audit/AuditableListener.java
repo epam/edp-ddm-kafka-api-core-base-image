@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.kafkaapi.core.annotation;
+package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface DatabaseOperation {
+public @interface AuditableListener {
 
   Operation value();
 }

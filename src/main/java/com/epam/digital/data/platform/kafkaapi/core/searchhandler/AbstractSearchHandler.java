@@ -16,7 +16,7 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.searchhandler;
 
-import com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation;
+import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.exception.SqlErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.Request;
@@ -33,7 +33,7 @@ public abstract class AbstractSearchHandler<I, O> implements SearchHandler<I, O>
   @Autowired
   protected DSLContext context;
 
-  @DatabaseOperation(Operation.SEARCH)
+  @AuditableDatabaseOperation(Operation.SEARCH)
   @Override
   public List<O> search(Request<I> input) {
     I searchCriteria = input.getPayload();

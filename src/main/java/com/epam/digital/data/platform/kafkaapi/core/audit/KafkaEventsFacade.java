@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaEventsFacade extends AbstractAuditFacade {
 
-  static final String KAFKA_REQUEST = "Kafka request. Method: ";
+  private static final String KAFKA_REQUEST = "Kafka request. Method: ";
 
   private final JwtInfoProvider jwtInfoProvider;
   private final TraceProvider traceProvider;

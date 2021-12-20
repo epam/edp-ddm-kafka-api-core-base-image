@@ -16,7 +16,7 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.listener.impl;
 
-import com.epam.digital.data.platform.kafkaapi.core.annotation.KafkaAudit;
+import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableListener;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.listener.GenericQueryListener;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
@@ -39,7 +39,7 @@ public class GenericQueryListenerTestImpl extends GenericQueryListener<UUID, Moc
     super(commandHandler);
   }
 
-  @KafkaAudit(Operation.CREATE)
+  @AuditableListener(Operation.CREATE)
   @Override
   @KafkaListener
   @SendTo
@@ -48,7 +48,7 @@ public class GenericQueryListenerTestImpl extends GenericQueryListener<UUID, Moc
     return super.create(key, input);
   }
 
-  @KafkaAudit(Operation.CREATE)
+  @AuditableListener(Operation.CREATE)
   @Override
   @KafkaListener
   @SendTo
@@ -57,7 +57,7 @@ public class GenericQueryListenerTestImpl extends GenericQueryListener<UUID, Moc
     return super.update(key, input);
   }
 
-  @KafkaAudit(Operation.CREATE)
+  @AuditableListener(Operation.CREATE)
   @Override
   @KafkaListener
   @SendTo

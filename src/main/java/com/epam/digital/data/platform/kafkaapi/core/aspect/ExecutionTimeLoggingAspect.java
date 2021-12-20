@@ -46,7 +46,7 @@ public class ExecutionTimeLoggingAspect {
     return logJoinPointTime(joinPoint, DIGITAL_SIGNATURE_OPS_COMMUNICATION_OPERATION_NAME);
   }
 
-  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.annotation.DatabaseOperation)")
+  @Around("@annotation(com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation)")
   public Object logDbCommunicationTime(ProceedingJoinPoint joinPoint) throws Throwable {
     return logJoinPointTime(joinPoint, DATABASE_COMMUNICATION_OPERATION_NAME);
   }
