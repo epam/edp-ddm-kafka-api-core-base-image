@@ -5,14 +5,14 @@
 
 	<groupId>com.epam.digital.data.platform</groupId>
 	<artifactId>kafka-api-core</artifactId>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>1.5.2-SNAPSHOT</version>
 
 	<name>kafka-api-core</name>
 	<description>Static classes for kafka api component</description>
 
 	<properties>
 		<model.core.version>1.4.0-SNAPSHOT</model.core.version>
-		<ddm.starter.kafka.api.version>1.5.0-SNAPSHOT</ddm.starter.kafka.api.version>
+		<ddm.starter.kafka.api.version>1.5.2-SNAPSHOT</ddm.starter.kafka.api.version>
 		<ddm.starter.logger.version>1.5.1-SNAPSHOT</ddm.starter.logger.version>
 		<ddm.starter.actuator.version>1.5.0-SNAPSHOT</ddm.starter.actuator.version>
 		<ddm.starter.audit.version>1.5.0-SNAPSHOT</ddm.starter.audit.version>
@@ -24,8 +24,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<log4j.version>2.16.0</log4j.version>
-		<spring.boot.version>2.3.5.RELEASE</spring.boot.version>
-		<model.mapper.version>2.3.0</model.mapper.version>
+		<spring.boot.version>2.6.1</spring.boot.version>
+		<spring.cloud.version>2021.0.0</spring.cloud.version>
 		<jackson.core.version>2.12.0</jackson.core.version>
 		<keycloak.core.version>12.0.3</keycloak.core.version>
 		<sonar.coverage.exclusions>
@@ -47,7 +47,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>Hoxton.SR8</version>
+				<version>${spring.cloud.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -136,6 +136,7 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>9.10.1</version>
 		</dependency>
 
 		<dependency>
@@ -150,7 +151,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-kubernetes-config</artifactId>
+			<artifactId>spring-cloud-starter-kubernetes-client-config</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -170,17 +177,6 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.modelmapper</groupId>
-			<artifactId>modelmapper</artifactId>
-			<version>${model.mapper.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.modelmapper.extensions</groupId>
-			<artifactId>modelmapper-jooq</artifactId>
-			<version>${model.mapper.version}</version>
 		</dependency>
 
 		<dependency>
