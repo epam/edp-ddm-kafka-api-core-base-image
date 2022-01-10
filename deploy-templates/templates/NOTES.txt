@@ -1,1 +1,0 @@
-1. Application kafka-api-core-base-image has been successfully deployed!!
