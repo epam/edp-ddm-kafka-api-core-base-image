@@ -21,18 +21,15 @@ import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOpera
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ConstraintViolationException;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
-import com.epam.digital.data.platform.model.core.kafka.EntityId;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
-import java.util.Map;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
-public abstract class AbstractCommandHandler<T> implements CommandHandler<T> {
+import java.util.Map;
+
+public abstract class AbstractUpdateCommandHandler<T> implements UpdateCommandHandler<T> {
 
   @Autowired
   private JwtInfoProvider jwtInfoProvider;
@@ -40,33 +37,21 @@ public abstract class AbstractCommandHandler<T> implements CommandHandler<T> {
   private DmlOperationHandler dmlOperationHandler;
 
   private final EntityConverter<T> entityConverter;
+  private final TableDataProvider tableDataProvider;
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
-  protected AbstractCommandHandler(
-      EntityConverter<T> entityConverter) {
+  protected AbstractUpdateCommandHandler(
+      EntityConverter<T> entityConverter, TableDataProvider tableDataProvider) {
     this.entityConverter = entityConverter;
-  }
-
-  @Override
-  public EntityId save(Request<T> input) {
-    JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
-    Map<String, Object> entityMap = entityConverter.entityToMap(input.getPayload());
-    entityMap.remove(pkColumnName());
-    Map<String, String> sysValues = entityConverter.buildSysValues(userClaims.getDrfo(), input);
-
-    String id = dmlOperationHandler.save(
-        DmlOperationArgs.builder(tableName(), userClaims, sysValues)
-            .saveOperationArgs(entityMap)
-            .build());
-    return new EntityId(UUID.fromString(id));
+    this.tableDataProvider = tableDataProvider;
   }
 
   @Override
   public void update(Request<T> input) {
     JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
     Map<String, Object> entityMap = entityConverter.entityToMap(input.getPayload());
-    Object entityId = entityMap.remove(pkColumnName());
+    Object entityId = entityMap.remove(tableDataProvider.pkColumnName());
 
     if (entityId == null) {
       log.error("No entity ID for update");
@@ -75,24 +60,8 @@ public abstract class AbstractCommandHandler<T> implements CommandHandler<T> {
 
     Map<String, String> sysValues = entityConverter.buildSysValues(userClaims.getDrfo(), input);
     dmlOperationHandler.update(
-        DmlOperationArgs.builder(tableName(), userClaims, sysValues)
+        DmlOperationArgs.builder(tableDataProvider.tableName(), userClaims, sysValues)
             .updateOperationArgs(entityId.toString(), entityMap)
             .build());
   }
-
-  @Override
-  public void delete(Request<T> input) {
-    JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
-    String entityId = entityConverter.getUuidOfEntity(input.getPayload(), pkColumnName());
-    Map<String, String> sysValues = entityConverter.buildSysValues(userClaims.getDrfo(), input);
-
-    dmlOperationHandler.delete(
-        DmlOperationArgs.builder(tableName(), userClaims, sysValues)
-            .deleteOperationArgs(entityId)
-            .build());
-  }
-
-  public abstract String tableName();
-
-  public abstract String pkColumnName();
 }

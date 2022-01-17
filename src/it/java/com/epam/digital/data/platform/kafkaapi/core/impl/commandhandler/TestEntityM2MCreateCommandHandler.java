@@ -16,25 +16,17 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler;
 
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCreateCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
-import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityFile;
+import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityM2M;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityM2MTableDataProvider;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TestEntityFileCommandHandler extends AbstractCommandHandler<TestEntityFile> {
+public class TestEntityM2MCreateCommandHandler extends AbstractCreateCommandHandler<TestEntityM2M> {
 
-  public TestEntityFileCommandHandler(EntityConverter<TestEntityFile> entityConverter) {
-    super(entityConverter);
-  }
-
-  @Override
-  public String tableName() {
-    return "test_entity_file";
-  }
-
-  @Override
-  public String pkColumnName() {
-    return "id";
+  public TestEntityM2MCreateCommandHandler(EntityConverter<TestEntityM2M> entityConverter,
+                                           TestEntityM2MTableDataProvider tableDataProvider) {
+    super(entityConverter, tableDataProvider);
   }
 }

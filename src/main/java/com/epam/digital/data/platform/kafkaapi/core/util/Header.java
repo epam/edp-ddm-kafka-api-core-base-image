@@ -33,4 +33,6 @@ public class Header {
       "x-source-business-activity-instance-id";
 
   public static final String TRACE_ID = "X-B3-TraceId";
+
+  public static final String DIGITAL_SEAL = "digital-seal";
 }

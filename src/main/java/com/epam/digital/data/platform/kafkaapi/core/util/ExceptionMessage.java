@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
+package com.epam.digital.data.platform.kafkaapi.core.util;
 
-import com.epam.digital.data.platform.model.core.kafka.EntityId;
-import com.epam.digital.data.platform.model.core.kafka.Request;
-import org.springframework.cloud.sleuth.annotation.NewSpan;
+public final class ExceptionMessage {
 
-public interface CommandHandler<T> {
+  public static final String INPUT_IS_INVALID_MESSAGE = "Input is invalid";
+  public static final String GENERIC_REQUEST_PROCESSING_EXCEPTION_MESSAGE = "Exception while request processing";
+  public static final String UNEXPECTED_EXCEPTION_MESSAGE_FORMAT = "Unexpected exception while executing the %s method";
 
-  @NewSpan
-  EntityId save(Request<T> input);
-
-  @NewSpan
-  void update(Request<T> input);
-
-  @NewSpan
-  void delete(Request<T> input);
+  private ExceptionMessage() {}
 }

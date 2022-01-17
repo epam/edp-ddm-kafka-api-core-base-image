@@ -16,13 +16,14 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.config.TestConfiguration;
-import com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler.TestEntityFileCommandHandler;
+import com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler.TestEntityFileCreateCommandHandler;
+import com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler.TestEntityFileDeleteCommandHandler;
+import com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler.TestEntityFileUpdateCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityFile;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityFileTableDataProvider;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.kafkaapi.core.util.DaoTestUtils;
 import com.epam.digital.data.platform.kafkaapi.core.util.SecurityUtils;
@@ -38,11 +39,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @TestConfiguration
 @SpringBootTest(
     classes = {
-        TestEntityFileCommandHandler.class,
+        TestEntityFileCreateCommandHandler.class,
+        TestEntityFileUpdateCommandHandler.class,
+        TestEntityFileDeleteCommandHandler.class,
         EntityConverter.class,
+        TestEntityFileTableDataProvider.class,
         DmlOperationHandler.class,
         JwtInfoProvider.class,
         TokenParser.class
@@ -53,7 +59,11 @@ class TestEntityFileCommandHandlerIT {
   static final String TYPICAL_UUID = "123e4567-e89b-12d3-a456-426655440000";
 
   @Autowired
-  TestEntityFileCommandHandler commandHandler;
+  TestEntityFileCreateCommandHandler createCommandHandler;
+  @Autowired
+  TestEntityFileUpdateCommandHandler updateCommandHandler;
+  @Autowired
+  TestEntityFileDeleteCommandHandler deleteCommandHandler;
 
   TestEntityFile newTestRecord;
   Request<TestEntityFile> newTestRequest;
@@ -76,7 +86,7 @@ class TestEntityFileCommandHandlerIT {
   @Test
   @DisplayName("Save new record has no errors on processing")
   void expectNoErrorsWhenSave() {
-    Assertions.assertDoesNotThrow(() -> commandHandler.save(newTestRequest));
+    Assertions.assertDoesNotThrow(() -> createCommandHandler.save(newTestRequest));
   }
 
   @Test
@@ -85,12 +95,12 @@ class TestEntityFileCommandHandlerIT {
     String updatedName = "Test User";
     existingTestRecord.setLegalEntityName(updatedName);
 
-    assertDoesNotThrow(() -> commandHandler.update(existingTestRequest));
+    assertDoesNotThrow(() -> updateCommandHandler.update(existingTestRequest));
   }
 
   @Test
   @DisplayName("Delete record has no errors on processing")
   void expectNoErrorsWhenDelete() {
-    assertDoesNotThrow(() -> commandHandler.delete(existingTestRequest));
+    assertDoesNotThrow(() -> deleteCommandHandler.delete(existingTestRequest));
   }
 }

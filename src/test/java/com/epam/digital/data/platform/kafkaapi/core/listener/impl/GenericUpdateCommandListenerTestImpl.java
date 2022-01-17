@@ -17,35 +17,27 @@
 package com.epam.digital.data.platform.kafkaapi.core.listener.impl;
 
 import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableListener;
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
-import com.epam.digital.data.platform.kafkaapi.core.listener.GenericQueryListener;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.UpdateCommandHandlerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.listener.GenericUpdateCommandListener;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.EntityId;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
-import java.util.UUID;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.SendTo;
 
+import static com.epam.digital.data.platform.kafkaapi.core.util.Header.DIGITAL_SEAL;
+
 @TestComponent
-public class GenericQueryListenerTestImpl extends GenericQueryListener<UUID, MockEntity> {
+public class GenericUpdateCommandListenerTestImpl extends GenericUpdateCommandListener<MockEntity> {
 
-  protected GenericQueryListenerTestImpl(
-      AbstractCommandHandler<MockEntity> commandHandler) {
+  protected GenericUpdateCommandListenerTestImpl(
+      UpdateCommandHandlerTestImpl commandHandler) {
     super(commandHandler);
-  }
-
-  @AuditableListener(Operation.CREATE)
-  @Override
-  @KafkaListener
-  @SendTo
-  public Message<Response<EntityId>> create(
-      @Header(name = DIGITAL_SEAL, required = false) String key, Request<MockEntity> input) {
-    return super.create(key, input);
   }
 
   @AuditableListener(Operation.CREATE)
@@ -55,14 +47,5 @@ public class GenericQueryListenerTestImpl extends GenericQueryListener<UUID, Moc
   public Message<Response<Void>> update(
       @Header(name = DIGITAL_SEAL, required = false) String key, Request<MockEntity> input) {
     return super.update(key, input);
-  }
-
-  @AuditableListener(Operation.CREATE)
-  @Override
-  @KafkaListener
-  @SendTo
-  public Message<Response<Void>> delete(
-      @Header(name = DIGITAL_SEAL, required = false) String key, Request<MockEntity> id) {
-    return super.delete(key, id);
   }
 }

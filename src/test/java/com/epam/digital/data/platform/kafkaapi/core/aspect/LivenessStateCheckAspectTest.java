@@ -16,16 +16,10 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.aspect;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CommandHandlerTestImpl;
-import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericQueryListenerTestImpl;
-import com.epam.digital.data.platform.kafkaapi.core.queryhandler.impl.QueryHandlerTestImpl;
-import com.epam.digital.data.platform.kafkaapi.core.service.DigitalSignatureService;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CreateCommandHandlerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericCreateCommandListenerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.service.InputValidationService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
-import com.epam.digital.data.platform.kafkaapi.core.service.JwtValidationService;
 import com.epam.digital.data.platform.kafkaapi.core.service.ResponseMessageCreator;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
@@ -38,22 +32,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @Import({AopAutoConfiguration.class})
-@SpringBootTest(classes = {GenericQueryListenerTestImpl.class, LivenessStateCheckAspect.class})
+@SpringBootTest(classes = {GenericCreateCommandListenerTestImpl.class, LivenessStateCheckAspect.class})
 class LivenessStateCheckAspectTest {
 
   @Autowired
-  private GenericQueryListenerTestImpl genericListener;
-  @MockBean
-  private JwtValidationService jwtValidationService;
+  private GenericCreateCommandListenerTestImpl commandListener;
   @MockBean
   private JwtInfoProvider jwtInfoProvider;
   @MockBean
-  private QueryHandlerTestImpl queryHandler;
+  private CreateCommandHandlerTestImpl commandHandler;
   @MockBean
-  private CommandHandlerTestImpl commandHandler;
-  @MockBean
-  private DigitalSignatureService digitalSignatureService;
+  private InputValidationService inputValidationService;
   @MockBean
   private LivenessStateHandler livenessStateHandler;
   @MockBean
@@ -64,7 +58,7 @@ class LivenessStateCheckAspectTest {
     when(responseMessageCreator.createMessageByPayloadSize(any()))
             .thenReturn(MessageBuilder.withPayload(new Response<>()).build());
 
-    genericListener.create("", new Request<>());
+    commandListener.create("", new Request<>());
 
     verify(livenessStateHandler).handleResponse(any(), any());
   }

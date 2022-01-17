@@ -16,18 +16,15 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.audit;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.epam.digital.data.platform.kafkaapi.core.aspect.AuditAspect;
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractCommandHandler;
-import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericQueryListenerTestImpl;
-import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CreateCommandHandlerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.DeleteCommandHandlerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.UpdateCommandHandlerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericCreateCommandListenerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericDeleteCommandListenerTestImpl;
+import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericUpdateCommandListenerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.searchhandler.AbstractSearchHandler;
-import com.epam.digital.data.platform.kafkaapi.core.service.DigitalSignatureService;
-import com.epam.digital.data.platform.kafkaapi.core.service.JwtValidationService;
+import com.epam.digital.data.platform.kafkaapi.core.service.InputValidationService;
 import com.epam.digital.data.platform.kafkaapi.core.service.ResponseMessageCreator;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
@@ -40,28 +37,38 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.support.MessageBuilder;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @Import({AopAutoConfiguration.class})
 @SpringBootTest(
     classes = {
-        AuditAspect.class,
-        KafkaAuditProcessor.class,
-        GenericQueryListenerTestImpl.class
+      AuditAspect.class,
+      KafkaAuditProcessor.class,
+      GenericCreateCommandListenerTestImpl.class,
+      GenericUpdateCommandListenerTestImpl.class,
+      GenericDeleteCommandListenerTestImpl.class
     })
 @MockBean(DatabaseAuditProcessor.class)
 @MockBean(AbstractSearchHandler.class)
-@MockBean(AbstractCommandHandler.class)
-@MockBean(AbstractQueryHandler.class)
+@MockBean(CreateCommandHandlerTestImpl.class)
+@MockBean(UpdateCommandHandlerTestImpl.class)
+@MockBean(DeleteCommandHandlerTestImpl.class)
 class AuditKafkaEventsAspectTest {
 
   @Autowired
-  private GenericQueryListenerTestImpl genericQueryListener;
+  private GenericCreateCommandListenerTestImpl createCommandListener;
+  @Autowired
+  private GenericUpdateCommandListenerTestImpl updateCommandListener;
+  @Autowired
+  private GenericDeleteCommandListenerTestImpl deleteCommandListener;
 
   @MockBean
   private KafkaEventsFacade kafkaEventsFacade;
   @MockBean
-  private DigitalSignatureService signatureService;
-  @MockBean
-  private JwtValidationService jwtValidationService;
+  private InputValidationService inputValidationService;
   @MockBean
   private ResponseMessageCreator responseMessageCreator;
 
@@ -74,7 +81,7 @@ class AuditKafkaEventsAspectTest {
   @Test
   void expectAuditAspectBeforeAndAfterCreateMethodWhenNoException() {
 
-    genericQueryListener.create("", new Request());
+    createCommandListener.create("", new Request<>());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
@@ -82,9 +89,9 @@ class AuditKafkaEventsAspectTest {
 
   @Test
   void expectAuditAspectBeforeAndAfterCreateMethodWhenAnyException() {
-    when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
+    when(inputValidationService.validate(any(), any())).thenThrow(new RuntimeException());
 
-    genericQueryListener.create("", new Request());
+    createCommandListener.create("", new Request<>());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
@@ -93,7 +100,7 @@ class AuditKafkaEventsAspectTest {
   @Test
   void expectAuditAspectBeforeAndAfterUpdateMethodWhenNoException() {
 
-    genericQueryListener.update("", new Request());
+    updateCommandListener.update("", new Request<>());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
@@ -101,9 +108,9 @@ class AuditKafkaEventsAspectTest {
 
   @Test
   void expectAuditAspectBeforeAndAfterUpdateMethodWhenAnyException() {
-    when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
+    when(inputValidationService.validate(any(), any())).thenThrow(new RuntimeException());
 
-    genericQueryListener.update("", new Request());
+    updateCommandListener.update("", new Request<>());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
@@ -112,7 +119,7 @@ class AuditKafkaEventsAspectTest {
   @Test
   void expectAuditAspectBeforeAndAfterDeleteMethodWhenNoException() {
 
-    genericQueryListener.delete("", new Request());
+    deleteCommandListener.delete("", new Request<>());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
@@ -120,9 +127,9 @@ class AuditKafkaEventsAspectTest {
 
   @Test
   void expectAuditAspectBeforeAndAfterDeleteMethodWhenAnyException() {
-    when(jwtValidationService.isValid(any())).thenThrow(new RuntimeException());
+    when(inputValidationService.validate(any(), any())).thenThrow(new RuntimeException());
 
-    genericQueryListener.delete("", new Request());
+    deleteCommandListener.delete("", new Request<>());
 
     verify(kafkaEventsFacade, times(2))
         .sendKafkaAudit(any(), any(), any(), any(), any(), any());
