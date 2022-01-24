@@ -67,13 +67,7 @@ public class JwtValidationService {
 
   @PostConstruct
   void postConstruct() {
-    if (jwtValidationEnabled) {
-      allowedRealmsRepresentations =
-          keycloakConfigProperties.getRealms().stream()
-              .collect(
-                  Collectors.toMap(
-                      Function.identity(), keycloakRestClient::getRealmRepresentation));
-    }
+    refreshAllowedRealmsRepresentations();
   }
 
   public <O> boolean isValid(Request<O> input) {
@@ -90,8 +84,7 @@ public class JwtValidationService {
     String issuerRealm = jwtIssuer.substring(jwtIssuer.lastIndexOf("/") + 1);
 
     if (keycloakConfigProperties.getRealms().contains(issuerRealm)) {
-      PublicKey keycloakPublicKey = allowedRealmsRepresentations.get(issuerRealm).getPublicKey();
-      return isVerifiedToken(accessToken, keycloakPublicKey);
+      return retryableIsVerifiedToken(accessToken, issuerRealm);
     } else {
       throw new JwtValidationException("Issuer realm is not valid");
     }
@@ -119,6 +112,17 @@ public class JwtValidationService {
         .orElse(true);
   }
 
+  private boolean retryableIsVerifiedToken(String accessToken, String issuerRealm) {
+    PublicKey keycloakPublicKey = allowedRealmsRepresentations.get(issuerRealm).getPublicKey();
+    if(isVerifiedToken(accessToken, keycloakPublicKey)) {
+      return true;
+    }
+    log.info("Update realm information and retry validate token");
+    refreshAllowedRealmsRepresentations();
+    keycloakPublicKey = allowedRealmsRepresentations.get(issuerRealm).getPublicKey();
+    return isVerifiedToken(accessToken, keycloakPublicKey);
+  }
+
   private boolean isVerifiedToken(String accessToken, PublicKey publicKey) {
     try {
       TokenVerifier.create(accessToken, JsonWebToken.class)
@@ -128,6 +132,16 @@ public class JwtValidationService {
     } catch (VerificationException e) {
       log.error("JWT token is not valid", e);
       return false;
+    }
+  }
+  
+  private void refreshAllowedRealmsRepresentations() {
+    if (jwtValidationEnabled) {
+      allowedRealmsRepresentations =
+          keycloakConfigProperties.getRealms().stream()
+              .collect(
+                  Collectors.toMap(
+                      Function.identity(), keycloakRestClient::getRealmRepresentation));
     }
   }
 }
