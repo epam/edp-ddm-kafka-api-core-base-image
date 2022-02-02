@@ -24,14 +24,15 @@ import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.kafkaapi.core.util.SQLExceptionResolverUtil;
 import java.sql.Array;
 import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.postgresql.util.HStoreConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class DmlOperationHandler {
@@ -47,11 +48,12 @@ public class DmlOperationHandler {
   }
 
   @AuditableDatabaseOperation(Operation.CREATE)
+  @Transactional
   public String save(DmlOperationArgs args) {
     log.info("Inserting into DB");
 
-    try (Connection connection = dataSource.getConnection();
-        CallableStatement statement = connection.prepareCall(DmlOperation.I.getSqlString())) {
+    var connection = DataSourceUtils.getConnection(dataSource);
+    try (CallableStatement statement = connection.prepareCall(DmlOperation.I.getSqlString())) {
       Array rolesDbArray = connection
           .createArrayOf("text", JwtClaimsUtils.getRoles(args.getUserClaims()).toArray());
       statement.setString(1, args.getTableName());
@@ -72,11 +74,12 @@ public class DmlOperationHandler {
   }
 
   @AuditableDatabaseOperation(Operation.UPDATE)
+  @Transactional
   public void update(DmlOperationArgs args) {
     log.info("Updating in DB");
 
-    try (Connection connection = dataSource.getConnection();
-        CallableStatement statement = connection.prepareCall(DmlOperation.U.getSqlString())) {
+    var connection = DataSourceUtils.getConnection(dataSource);
+    try (CallableStatement statement = connection.prepareCall(DmlOperation.U.getSqlString())) {
       Array rolesDbArray = connection
           .createArrayOf("text", JwtClaimsUtils.getRoles(args.getUserClaims()).toArray());
       statement.setString(1, args.getTableName());
@@ -92,11 +95,12 @@ public class DmlOperationHandler {
   }
 
   @AuditableDatabaseOperation(Operation.DELETE)
+  @Transactional
   public void delete(DmlOperationArgs args) {
     log.info("Deleting from DB");
 
-    try (Connection connection = dataSource.getConnection();
-        CallableStatement statement = connection.prepareCall(DmlOperation.D.getSqlString())) {
+    var connection = DataSourceUtils.getConnection(dataSource);
+    try (CallableStatement statement = connection.prepareCall(DmlOperation.D.getSqlString())) {
       Array rolesDbArray = connection
           .createArrayOf("text", JwtClaimsUtils.getRoles(args.getUserClaims()).toArray());
       statement.setString(1, args.getTableName());

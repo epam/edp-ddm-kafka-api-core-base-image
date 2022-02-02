@@ -31,7 +31,7 @@
 		<sonar.coverage.exclusions>
 			**/config/**/*,
 			**/util/JooqDataTypes*,
-			**/**/GenericRoleBased*,
+			**/**/GenericRoleBased*
 		</sonar.coverage.exclusions>
 	</properties>
 
