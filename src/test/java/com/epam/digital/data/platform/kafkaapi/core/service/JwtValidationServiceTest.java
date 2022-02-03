@@ -16,6 +16,7 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
+import com.epam.digital.data.platform.integration.idm.client.KeycloakAuthRestClient;
 import com.epam.digital.data.platform.kafkaapi.core.config.KeycloakConfigProperties;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtExpiredException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtValidationException;
@@ -58,7 +59,7 @@ class JwtValidationServiceTest {
   @MockBean
   private KeycloakConfigProperties keycloakConfigProperties;
   @MockBean
-  private KeycloakRestClient keycloakRestClient;
+  private KeycloakAuthRestClient keycloakRestClient;
   @MockBean
   private Clock clock;
 

@@ -66,4 +66,3 @@ public class MockEntityContains {
     this.personPassNumber = personPassNumber;
   }
 }
-

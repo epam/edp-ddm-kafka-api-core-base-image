@@ -16,6 +16,7 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
+import com.epam.digital.data.platform.integration.idm.client.KeycloakAuthRestClient;
 import com.epam.digital.data.platform.kafkaapi.core.config.KeycloakConfigProperties;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtExpiredException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtValidationException;
@@ -50,7 +51,7 @@ public class JwtValidationService {
   private final boolean jwtValidationEnabled;
   private final KeycloakConfigProperties keycloakConfigProperties;
 
-  private final KeycloakRestClient keycloakRestClient;
+  private final KeycloakAuthRestClient keycloakRestClient;
   private final Clock clock;
 
   private Map<String, PublishedRealmRepresentation> allowedRealmsRepresentations;
@@ -58,7 +59,7 @@ public class JwtValidationService {
   public JwtValidationService(
       @Value("${data-platform.jwt.validation.enabled}") boolean jwtValidationEnabled,
       KeycloakConfigProperties keycloakConfigProperties,
-      KeycloakRestClient keycloakRestClient, Clock clock) {
+      KeycloakAuthRestClient keycloakRestClient, Clock clock) {
     this.jwtValidationEnabled = jwtValidationEnabled;
     this.keycloakConfigProperties = keycloakConfigProperties;
     this.keycloakRestClient = keycloakRestClient;
