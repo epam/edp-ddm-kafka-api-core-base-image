@@ -18,7 +18,6 @@ package com.epam.digital.data.platform.kafkaapi.core.audit;
 
 import com.epam.digital.data.platform.starter.audit.model.AuditSourceInfo;
 import com.epam.digital.data.platform.starter.audit.model.AuditUserInfo;
-
 import java.time.LocalDateTime;
 
 public final class AuditEventUtils {
@@ -42,18 +41,19 @@ public final class AuditEventUtils {
 
   public static final LocalDateTime CURR_TIME = LocalDateTime.of(2021, 4, 1, 11, 50);
 
-  private AuditEventUtils() {}
+  private AuditEventUtils() {
+  }
 
   public static AuditSourceInfo createSourceInfo() {
     return AuditSourceInfo.AuditSourceInfoBuilder.anAuditSourceInfo()
-            .system(SOURCE_SYSTEM)
-            .application(SOURCE_APPLICATION)
-            .businessProcess(BUSINESS_PROCESS)
-            .businessProcessDefinitionId(BUSINESS_PROCESS_DEFINITION_ID)
-            .businessProcessInstanceId(BUSINESS_PROCESS_INSTANCE_ID)
-            .businessActivity(BUSINESS_ACTIVITY)
-            .businessActivityInstanceId(BUSINESS_ACTIVITY_INSTANCE_ID)
-            .build();
+        .system(SOURCE_SYSTEM)
+        .application(SOURCE_APPLICATION)
+        .businessProcess(BUSINESS_PROCESS)
+        .businessProcessDefinitionId(BUSINESS_PROCESS_DEFINITION_ID)
+        .businessProcessInstanceId(BUSINESS_PROCESS_INSTANCE_ID)
+        .businessActivity(BUSINESS_ACTIVITY)
+        .businessActivityInstanceId(BUSINESS_ACTIVITY_INSTANCE_ID)
+        .build();
   }
 
   public static AuditUserInfo createUserInfo() {

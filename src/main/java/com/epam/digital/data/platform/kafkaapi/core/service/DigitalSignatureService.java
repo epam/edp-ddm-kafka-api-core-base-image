@@ -16,8 +16,8 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
-import com.epam.digital.data.platform.dso.api.dto.VerifyRequestDto;
-import com.epam.digital.data.platform.dso.api.dto.VerifyResponseDto;
+import com.epam.digital.data.platform.dso.api.dto.VerificationRequestDto;
+import com.epam.digital.data.platform.dso.api.dto.VerificationResponseDto;
 import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.dso.client.exception.BadRequestException;
 import com.epam.digital.data.platform.dso.client.exception.InternalServerErrorException;
@@ -100,9 +100,9 @@ public class DigitalSignatureService {
   private boolean verify(String signature, String data) {
     try {
       log.info("Verifying Signature");
-      VerifyResponseDto responseDto =
-          digitalSealRestClient.verify(new VerifyRequestDto(signature, data));
-      return responseDto.isValid;
+      VerificationResponseDto responseDto =
+          digitalSealRestClient.verify(new VerificationRequestDto(signature, data));
+      return responseDto.isValid();
     } catch (BadRequestException e) {
       throw new ExternalCommunicationException(
           "Call to external digital signature service violates an internal contract",

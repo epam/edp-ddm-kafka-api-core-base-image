@@ -16,12 +16,13 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.listener.impl;
 
+import static com.epam.digital.data.platform.kafkaapi.core.util.Header.DIGITAL_SEAL;
+
 import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableListener;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.UpdateCommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.listener.GenericUpdateCommandListener;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
-import com.epam.digital.data.platform.model.core.kafka.EntityId;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
 import org.springframework.boot.test.context.TestComponent;
@@ -30,13 +31,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.SendTo;
 
-import static com.epam.digital.data.platform.kafkaapi.core.util.Header.DIGITAL_SEAL;
-
 @TestComponent
 public class GenericUpdateCommandListenerTestImpl extends GenericUpdateCommandListener<MockEntity> {
 
-  protected GenericUpdateCommandListenerTestImpl(
-      UpdateCommandHandlerTestImpl commandHandler) {
+  protected GenericUpdateCommandListenerTestImpl(UpdateCommandHandlerTestImpl commandHandler) {
     super(commandHandler);
   }
 

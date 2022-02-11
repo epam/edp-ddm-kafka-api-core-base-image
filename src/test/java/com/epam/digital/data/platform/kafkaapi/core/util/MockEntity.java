@@ -18,10 +18,9 @@ package com.epam.digital.data.platform.kafkaapi.core.util;
 
 import com.epam.digital.data.platform.model.core.kafka.File;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
-import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import javax.validation.constraints.Pattern;
 
 public class MockEntity {
 

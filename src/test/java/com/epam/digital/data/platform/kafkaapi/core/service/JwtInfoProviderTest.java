@@ -16,6 +16,12 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtValidationException;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
@@ -38,13 +44,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(SpringExtension.class)
 class JwtInfoProviderTest {
 
@@ -64,8 +63,8 @@ class JwtInfoProviderTest {
   @Test
   void expectJwtIsParsed() throws JOSEException {
     JWTClaimsSet claims = new JWTClaimsSet.Builder()
-            .claim(DRFO_CLAIM_NAME, DRFO_CLAIM_VALUE)
-            .build();
+        .claim(DRFO_CLAIM_NAME, DRFO_CLAIM_VALUE)
+        .build();
     Request<Void> input = mockRequest(claims);
     JwtClaimsDto jwtClaimsDto = new JwtClaimsDto();
     when(tokenParser.parseClaims(any())).thenReturn(jwtClaimsDto);
@@ -78,10 +77,10 @@ class JwtInfoProviderTest {
 
   @Test
   void expectJwtValidationExceptionIfParsingError() {
-    when(tokenParser.parseClaims(any()))
-            .thenThrow(new JwtParsingException(""));
+    when(tokenParser.parseClaims(any())).thenThrow(new JwtParsingException(""));
 
-    assertThrows(JwtValidationException.class, () -> jwtInfoProvider.getUserClaims(new Request<>()));
+    assertThrows(JwtValidationException.class,
+        () -> jwtInfoProvider.getUserClaims(new Request<>()));
   }
 
   private Request<Void> mockRequest(JWTClaimsSet jwtClaims) throws JOSEException {

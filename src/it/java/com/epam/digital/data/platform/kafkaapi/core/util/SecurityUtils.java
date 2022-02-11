@@ -50,8 +50,8 @@ public final class SecurityUtils {
     RolesDto rolesDto = new RolesDto();
     rolesDto.setRoles(Collections.emptyList());
     JWTClaimsSet claims = new JWTClaimsSet.Builder()
-            .claim(ROLES_CLAIM, rolesDto)
-            .build();
+        .claim(ROLES_CLAIM, rolesDto)
+        .build();
     SignedJWT signedJWT = new SignedJWT(header, claims);
     signedJWT.sign(new ECDSASigner(key.toECPrivateKey()));
     return signedJWT.serialize();

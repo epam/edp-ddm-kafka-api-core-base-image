@@ -16,12 +16,6 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.audit;
 
-import com.epam.digital.data.platform.kafkaapi.core.util.Header;
-import com.epam.digital.data.platform.starter.audit.model.AuditSourceInfo;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.slf4j.MDC;
-
 import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.BUSINESS_ACTIVITY;
 import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.BUSINESS_ACTIVITY_INSTANCE_ID;
 import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.BUSINESS_PROCESS;
@@ -30,6 +24,12 @@ import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils
 import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.SOURCE_APPLICATION;
 import static com.epam.digital.data.platform.kafkaapi.core.audit.AuditEventUtils.SOURCE_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.epam.digital.data.platform.kafkaapi.core.util.Header;
+import com.epam.digital.data.platform.starter.audit.model.AuditSourceInfo;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 
 class MdcAuditSourceInfoProviderTest {
 

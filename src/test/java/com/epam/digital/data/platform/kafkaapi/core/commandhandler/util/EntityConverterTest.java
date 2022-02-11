@@ -16,24 +16,23 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.epam.digital.data.platform.kafkaapi.core.config.JooqTestConfig;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.model.core.kafka.File;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.RequestContext;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = {
     EntityConverter.class

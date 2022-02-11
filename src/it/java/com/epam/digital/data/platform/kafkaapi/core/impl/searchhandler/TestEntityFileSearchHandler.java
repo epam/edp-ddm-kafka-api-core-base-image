@@ -29,15 +29,14 @@ public class TestEntityFileSearchHandler extends AbstractSearchHandler<
     TestEntityFileSearchConditions,
     TestEntityFile> {
 
-  private static final Integer MAX_LIMIT = 10;
-
   @Override
   protected Condition whereClause(
       TestEntityFileSearchConditions searchConditions) {
     var c = DSL.noCondition();
 
     if (searchConditions.getLegalEntityName() != null) {
-      c = c.and(DSL.field("legal_entity_name").startsWithIgnoreCase(searchConditions.getLegalEntityName()));
+      c = c.and(DSL.field("legal_entity_name")
+          .startsWithIgnoreCase(searchConditions.getLegalEntityName()));
     }
 
     return c;
@@ -58,7 +57,8 @@ public class TestEntityFileSearchHandler extends AbstractSearchHandler<
     return Arrays.asList(
         DSL.field("id"),
         DSL.field("legal_entity_name"),
-        DSL.field("scan_copy", com.epam.digital.data.platform.kafkaapi.core.util.JooqDataTypes.FILE_DATA_TYPE)
+        DSL.field("scan_copy",
+            com.epam.digital.data.platform.kafkaapi.core.util.JooqDataTypes.FILE_DATA_TYPE)
     );
   }
 }

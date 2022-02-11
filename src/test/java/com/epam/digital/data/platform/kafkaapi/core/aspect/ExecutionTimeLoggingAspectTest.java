@@ -16,16 +16,25 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.aspect;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+
 import com.epam.digital.data.platform.dso.api.dto.SignRequestDto;
 import com.epam.digital.data.platform.dso.api.dto.SignResponseDto;
-import com.epam.digital.data.platform.dso.api.dto.VerifyRequestDto;
-import com.epam.digital.data.platform.dso.api.dto.VerifyResponseDto;
+import com.epam.digital.data.platform.dso.api.dto.VerificationRequestDto;
+import com.epam.digital.data.platform.dso.api.dto.VerificationResponseDto;
 import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.integration.ceph.model.CephObject;
 import com.epam.digital.data.platform.integration.ceph.model.CephObjectMetadata;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
 import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
@@ -33,26 +42,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.kafka.annotation.KafkaListener;
-
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 @Import({AopAutoConfiguration.class})
 @SpringBootTest(
     classes = {
-      ExecutionTimeLoggingAspectTest.MockCephService.class,
-      ExecutionTimeLoggingAspectTest.MockDigitalSealRestClient.class,
-      ExecutionTimeLoggingAspectTest.MockDbClient.class,
-      ExecutionTimeLoggingAspectTest.MockKafkaListener.class,
-      ExecutionTimeLoggingAspect.class,
+        ExecutionTimeLoggingAspectTest.MockCephService.class,
+        ExecutionTimeLoggingAspectTest.MockDigitalSealRestClient.class,
+        ExecutionTimeLoggingAspectTest.MockDbClient.class,
+        ExecutionTimeLoggingAspectTest.MockKafkaListener.class,
+        ExecutionTimeLoggingAspect.class,
     })
 class ExecutionTimeLoggingAspectTest {
 
@@ -109,7 +109,8 @@ class ExecutionTimeLoggingAspectTest {
     }
 
     @Override
-    public void put(String s, String s1, String s2) {}
+    public void put(String s, String s1, String s2) {
+    }
 
     @Override
     public CephObjectMetadata put(
@@ -118,7 +119,8 @@ class ExecutionTimeLoggingAspectTest {
     }
 
     @Override
-    public void delete(String s, Set<String> set) {}
+    public void delete(String s, Set<String> set) {
+    }
 
     @Override
     public Boolean exist(String s, Set<String> set) {
@@ -145,12 +147,17 @@ class ExecutionTimeLoggingAspectTest {
   static class MockDigitalSealRestClient implements DigitalSealRestClient {
 
     @Override
-    public VerifyResponseDto verify(VerifyRequestDto verifyRequestDto) {
+    public VerificationResponseDto verify(VerificationRequestDto VerificationRequestDto) {
       return null;
     }
 
     @Override
     public SignResponseDto sign(SignRequestDto signRequest) {
+      return null;
+    }
+
+    @Override
+    public SignResponseDto sign(SignRequestDto signRequestDto, HttpHeaders httpHeaders) {
       return null;
     }
   }
@@ -159,13 +166,15 @@ class ExecutionTimeLoggingAspectTest {
   static class MockDbClient {
 
     @AuditableDatabaseOperation(Operation.CREATE)
-    public void save() {}
+    public void save() {
+    }
   }
 
   @TestComponent
   static class MockKafkaListener {
 
     @KafkaListener
-    public void callKafka() {}
+    public void callKafka() {
+    }
   }
 }

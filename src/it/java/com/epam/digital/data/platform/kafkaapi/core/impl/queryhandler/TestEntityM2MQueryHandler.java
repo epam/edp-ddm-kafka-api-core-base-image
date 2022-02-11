@@ -54,6 +54,6 @@ public class TestEntityM2MQueryHandler extends AbstractQueryHandler<UUID, TestEn
         DSL.field("id"),
         DSL.field("name"),
         DSL.field("entities", JooqDataTypes.ARRAY_DATA_TYPE)
-        );
+    );
   }
 }

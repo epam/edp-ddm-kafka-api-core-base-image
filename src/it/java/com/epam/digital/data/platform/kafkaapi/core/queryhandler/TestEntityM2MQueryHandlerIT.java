@@ -37,10 +37,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @TestConfiguration
 @SpringBootTest(
     classes = {
-      TestEntityM2MQueryHandler.class,
-      AccessPermissionService.class,
-      JwtInfoProvider.class,
-      TokenParser.class
+        TestEntityM2MQueryHandler.class,
+        AccessPermissionService.class,
+        JwtInfoProvider.class,
+        TokenParser.class
     })
 class TestEntityM2MQueryHandlerIT {
 

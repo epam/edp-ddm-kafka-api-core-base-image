@@ -32,13 +32,11 @@ import com.epam.digital.data.platform.starter.audit.model.EventType;
 import com.epam.digital.data.platform.starter.audit.service.AuditService;
 import com.epam.digital.data.platform.starter.security.jwt.TokenParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,26 +57,22 @@ class KafkaEventsFacadeTest {
   private static final String RESULT = "RESULT";
 
   private static String ACCESS_TOKEN = "Token";
-
-  private KafkaEventsFacade kafkaEventsFacade;
   private static JwtInfoProvider jwtInfoProvider;
-
+  private final Clock clock =
+      Clock.fixed(CURR_TIME.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+  private KafkaEventsFacade kafkaEventsFacade;
   @Mock
   private AuditService auditService;
   @Mock
   private AuditSourceInfoProvider auditSourceInfoProvider;
   @Mock
   private TraceProvider traceProvider;
-
-  private final Clock clock =
-          Clock.fixed(CURR_TIME.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
-
   private AuditSourceInfo mockSourceInfo;
 
   @BeforeAll
   static void init() throws IOException {
-    ACCESS_TOKEN = new String(ByteStreams.toByteArray(
-        DatabaseEventsFacadeTest.class.getResourceAsStream("/accessToken.json")));
+    ACCESS_TOKEN = new String(DatabaseEventsFacadeTest.class
+        .getResourceAsStream("/accessToken.json").readAllBytes());
     jwtInfoProvider = new JwtInfoProvider(new TokenParser(new ObjectMapper()));
   }
 
@@ -92,7 +86,7 @@ class KafkaEventsFacadeTest {
 
     mockSourceInfo = createSourceInfo();
     when(auditSourceInfoProvider.getAuditSourceInfo())
-            .thenReturn(mockSourceInfo);
+        .thenReturn(mockSourceInfo);
   }
 
   @Test
@@ -110,15 +104,15 @@ class KafkaEventsFacadeTest {
     AuditEvent actualEvent = auditEventCaptor.getValue();
 
     var expectedEvent = AuditEvent.AuditEventBuilder.anAuditEvent()
-            .application(APP_NAME)
-            .name("Kafka request. Method: method")
-            .requestId(REQUEST_ID)
-            .sourceInfo(mockSourceInfo)
-            .userInfo(null)
-            .currentTime(clock.millis())
-            .eventType(EventType.USER_ACTION)
-            .context(context)
-            .build();
+        .application(APP_NAME)
+        .name("Kafka request. Method: method")
+        .requestId(REQUEST_ID)
+        .sourceInfo(mockSourceInfo)
+        .userInfo(null)
+        .currentTime(clock.millis())
+        .eventType(EventType.USER_ACTION)
+        .context(context)
+        .build();
 
     assertThat(actualEvent).usingRecursiveComparison().isEqualTo(expectedEvent);
   }
@@ -138,15 +132,15 @@ class KafkaEventsFacadeTest {
     AuditEvent actualEvent = auditEventCaptor.getValue();
 
     var expectedEvent = AuditEvent.AuditEventBuilder.anAuditEvent()
-            .application(APP_NAME)
-            .name("Kafka request. Method: method")
-            .requestId(REQUEST_ID)
-            .sourceInfo(mockSourceInfo)
-            .userInfo(createUserInfo())
-            .currentTime(clock.millis())
-            .eventType(EventType.USER_ACTION)
-            .context(context)
-            .build();
+        .application(APP_NAME)
+        .name("Kafka request. Method: method")
+        .requestId(REQUEST_ID)
+        .sourceInfo(mockSourceInfo)
+        .userInfo(createUserInfo())
+        .currentTime(clock.millis())
+        .eventType(EventType.USER_ACTION)
+        .context(context)
+        .build();
 
     assertThat(actualEvent).usingRecursiveComparison().isEqualTo(expectedEvent);
   }

@@ -16,6 +16,8 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.listener.impl;
 
+import static com.epam.digital.data.platform.kafkaapi.core.util.Header.DIGITAL_SEAL;
+
 import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableListener;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CreateCommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.listener.GenericCreateCommandListener;
@@ -30,13 +32,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.SendTo;
 
-import static com.epam.digital.data.platform.kafkaapi.core.util.Header.DIGITAL_SEAL;
-
 @TestComponent
 public class GenericCreateCommandListenerTestImpl extends GenericCreateCommandListener<MockEntity> {
 
-  protected GenericCreateCommandListenerTestImpl(
-          CreateCommandHandlerTestImpl commandHandler) {
+  protected GenericCreateCommandListenerTestImpl(CreateCommandHandlerTestImpl commandHandler) {
     super(commandHandler);
   }
 
@@ -45,7 +44,7 @@ public class GenericCreateCommandListenerTestImpl extends GenericCreateCommandLi
   @KafkaListener
   @SendTo
   public Message<Response<EntityId>> create(
-          @Header(name = DIGITAL_SEAL, required = false) String key, Request<MockEntity> input) {
+      @Header(name = DIGITAL_SEAL, required = false) String key, Request<MockEntity> input) {
     return super.create(key, input);
   }
 }

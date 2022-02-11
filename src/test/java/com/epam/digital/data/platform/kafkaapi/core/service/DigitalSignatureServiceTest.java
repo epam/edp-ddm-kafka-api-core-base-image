@@ -23,8 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.epam.digital.data.platform.dso.api.dto.VerifyRequestDto;
-import com.epam.digital.data.platform.dso.api.dto.VerifyResponseDto;
+import com.epam.digital.data.platform.dso.api.dto.VerificationRequestDto;
+import com.epam.digital.data.platform.dso.api.dto.VerificationResponseDto;
 import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.dso.client.exception.BadRequestException;
 import com.epam.digital.data.platform.dso.client.exception.InternalServerErrorException;
@@ -47,7 +47,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -70,13 +69,12 @@ class DigitalSignatureServiceTest {
 
   @BeforeEach
   void init() {
-    MockitoAnnotations.initMocks(this);
     when(cephService.getAsString(BUCKET, KEY)).thenReturn(Optional.of(SIGNATURE));
     digitalSignatureService = new DigitalSignatureService(cephService, BUCKET,
         digitalSealRestClient, objectMapper, true);
     request = new Request<>(getMockPayload(), null, null);
     when(digitalSealRestClient.verify(any()))
-        .thenReturn(new VerifyResponseDto().toBuilder().build());
+        .thenReturn(new VerificationResponseDto(true, null));
   }
 
   @Test
@@ -89,12 +87,12 @@ class DigitalSignatureServiceTest {
   void checkThatTheCorrectArgumentsArePassedToTheVerifyFunction() throws JsonProcessingException {
     digitalSignatureService.isSealValid(KEY, request);
 
-    ArgumentCaptor<VerifyRequestDto> requestCaptor = ArgumentCaptor
-        .forClass(VerifyRequestDto.class);
+    ArgumentCaptor<VerificationRequestDto> requestCaptor = ArgumentCaptor
+        .forClass(VerificationRequestDto.class);
     verify(digitalSealRestClient).verify(requestCaptor.capture());
 
-    assertEquals(SIGNATURE, requestCaptor.getValue().signature());
-    assertEquals(objectMapper.writeValueAsString(request), requestCaptor.getValue().data());
+    assertEquals(SIGNATURE, requestCaptor.getValue().getSignature());
+    assertEquals(objectMapper.writeValueAsString(request), requestCaptor.getValue().getData());
   }
 
   @Test
@@ -102,15 +100,17 @@ class DigitalSignatureServiceTest {
     when(cephService.getAsString(any(), any())).thenThrow(CephCommunicationException.class);
     var actualException = assertThrows(ExternalCommunicationException.class,
         () -> digitalSignatureService.isSealValid(KEY, request));
-    assertThat(actualException.getKafkaResponseStatus()).isEqualTo(Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
+    assertThat(actualException.getKafkaResponseStatus()).isEqualTo(
+        Status.THIRD_PARTY_SERVICE_UNAVAILABLE);
   }
 
   @Test
   void externalCommunicationExceptionWhenNotFoundCephContent() {
     when(cephService.getAsString(any(), any())).thenReturn(Optional.empty());
     var actualException = assertThrows(ExternalCommunicationException.class,
-            () -> digitalSignatureService.isSealValid(KEY, request));
-    assertThat(actualException.getKafkaResponseStatus()).isEqualTo(Status.INTERNAL_CONTRACT_VIOLATION);
+        () -> digitalSignatureService.isSealValid(KEY, request));
+    assertThat(actualException.getKafkaResponseStatus()).isEqualTo(
+        Status.INTERNAL_CONTRACT_VIOLATION);
   }
 
   @Test
@@ -137,7 +137,7 @@ class DigitalSignatureServiceTest {
   @Test
   void shouldReturnTrueWhenValidationDisabled() {
     digitalSignatureService = new DigitalSignatureService(cephService, BUCKET,
-            digitalSealRestClient, objectMapper, false);
+        digitalSealRestClient, objectMapper, false);
 
     var actual = digitalSignatureService.isSealValid(KEY, request);
 

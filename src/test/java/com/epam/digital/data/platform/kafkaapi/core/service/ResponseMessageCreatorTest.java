@@ -67,12 +67,14 @@ class ResponseMessageCreatorTest {
   void expectNoResponseChangesIfSizeIsSmallerThanMax() {
     var responseToProcess = mockResponse();
     var serializedResponseStr = "qwer";
-    when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
+    when(valueSerializer.serialize(null, responseToProcess))
+        .thenReturn(serializedResponseStr.getBytes());
 
     var actualResponseMessage =
         responseMessageCreator.createMessageByPayloadSize(responseToProcess);
 
-    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY)).isEqualTo(REQUEST_ID);
+    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY))
+        .isEqualTo(REQUEST_ID);
     assertThat(actualResponseMessage.getPayload()).isEqualTo(responseToProcess);
   }
 
@@ -80,15 +82,18 @@ class ResponseMessageCreatorTest {
   void expectSaveToCephIfSizeIsLargerThanMax() {
     var responseToProcess = mockResponse();
     var serializedResponseStr = "qwerty";
-    when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
+    when(valueSerializer.serialize(null, responseToProcess))
+        .thenReturn(serializedResponseStr.getBytes());
 
     var actualResponseMessage =
-            responseMessageCreator.createMessageByPayloadSize(responseToProcess);
+        responseMessageCreator.createMessageByPayloadSize(responseToProcess);
 
     verify(cephService).put(eq(BUCKET_NAME), any(), eq(serializedResponseStr));
 
-    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY)).isEqualTo(REQUEST_ID);
-    assertThat(actualResponseMessage.getHeaders().get(ResponseHeaders.CEPH_RESPONSE_KEY)).isNotNull();
+    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY))
+        .isEqualTo(REQUEST_ID);
+    assertThat(
+        actualResponseMessage.getHeaders().get(ResponseHeaders.CEPH_RESPONSE_KEY)).isNotNull();
     var actualResponsePayload = actualResponseMessage.getPayload();
     assertThat(actualResponsePayload.getPayload()).isNull();
     assertThat(actualResponsePayload.getStatus()).isNull();
@@ -99,15 +104,17 @@ class ResponseMessageCreatorTest {
   void expectErrorStatusWhenCephCommunicationException() {
     var responseToProcess = mockResponse();
     var serializedResponseStr = "qwerty";
-    when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
+    when(valueSerializer.serialize(null, responseToProcess)).thenReturn(
+        serializedResponseStr.getBytes());
     doThrow(new CephCommunicationException("", new RuntimeException()))
         .when(cephService)
         .put(any(), any(), any());
 
     var actualResponseMessage =
-            responseMessageCreator.createMessageByPayloadSize(responseToProcess);
+        responseMessageCreator.createMessageByPayloadSize(responseToProcess);
 
-    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY)).isEqualTo(REQUEST_ID);
+    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY))
+        .isEqualTo(REQUEST_ID);
     assertThat(actualResponseMessage.getHeaders().get(ResponseHeaders.CEPH_RESPONSE_KEY)).isNull();
     var actualResponsePayload = actualResponseMessage.getPayload();
     assertThat(actualResponsePayload.getPayload()).isNull();
@@ -119,15 +126,17 @@ class ResponseMessageCreatorTest {
   void expectErrorStatusWhenMisconfigurationException() {
     var responseToProcess = mockResponse();
     var serializedResponseStr = "qwerty";
-    when(valueSerializer.serialize(null, responseToProcess)).thenReturn(serializedResponseStr.getBytes());
+    when(valueSerializer.serialize(null, responseToProcess)).thenReturn(
+        serializedResponseStr.getBytes());
     doThrow(new MisconfigurationException(""))
-            .when(cephService)
-            .put(any(), any(), any());
+        .when(cephService)
+        .put(any(), any(), any());
 
     var actualResponseMessage =
-            responseMessageCreator.createMessageByPayloadSize(responseToProcess);
+        responseMessageCreator.createMessageByPayloadSize(responseToProcess);
 
-    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY)).isEqualTo(REQUEST_ID);
+    assertThat(actualResponseMessage.getHeaders().get(KafkaHeaders.MESSAGE_KEY))
+        .isEqualTo(REQUEST_ID);
     assertThat(actualResponseMessage.getHeaders().get(ResponseHeaders.CEPH_RESPONSE_KEY)).isNull();
     var actualResponsePayload = actualResponseMessage.getPayload();
     assertThat(actualResponsePayload.getPayload()).isNull();

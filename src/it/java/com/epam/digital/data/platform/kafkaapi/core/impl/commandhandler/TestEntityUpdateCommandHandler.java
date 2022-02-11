@@ -25,8 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestEntityUpdateCommandHandler extends AbstractUpdateCommandHandler<TestEntity> {
 
-  public TestEntityUpdateCommandHandler(EntityConverter<TestEntity> entityConverter,
-                                        TestEntityTableDataProvider tableDataProvider) {
+  public TestEntityUpdateCommandHandler(
+      EntityConverter<TestEntity> entityConverter,
+      TestEntityTableDataProvider tableDataProvider) {
     super(entityConverter, tableDataProvider);
   }
 }

@@ -62,8 +62,11 @@ class TestEntityFileSearchHandlerIT {
     final List<TestEntityFile> found = instance.search(request);
 
     Assertions.assertThat(found).hasSize(1);
-    Assertions.assertThat(found.get(0).getLegalEntityName()).isEqualTo(TEST_ENTITY_FILE.getLegalEntityName());
-    Assertions.assertThat(found.get(0).getScanCopy().getId()).isEqualTo(TEST_ENTITY_FILE.getScanCopy().getId());
-    Assertions.assertThat(found.get(0).getScanCopy().getChecksum()).isEqualTo(TEST_ENTITY_FILE.getScanCopy().getChecksum());
+    Assertions.assertThat(found.get(0).getLegalEntityName())
+        .isEqualTo(TEST_ENTITY_FILE.getLegalEntityName());
+    Assertions.assertThat(found.get(0).getScanCopy().getId())
+        .isEqualTo(TEST_ENTITY_FILE.getScanCopy().getId());
+    Assertions.assertThat(found.get(0).getScanCopy().getChecksum())
+        .isEqualTo(TEST_ENTITY_FILE.getScanCopy().getChecksum());
   }
 }

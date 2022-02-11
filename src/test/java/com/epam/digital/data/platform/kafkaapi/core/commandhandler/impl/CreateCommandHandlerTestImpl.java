@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.TestComponent;
 
 @TestComponent
 public class CreateCommandHandlerTestImpl extends AbstractCreateCommandHandler<MockEntity> {
+
   public CreateCommandHandlerTestImpl(
       EntityConverter<MockEntity> entityConverter,
       MockEntityTableDataProviderImpl tableDataProvider) {

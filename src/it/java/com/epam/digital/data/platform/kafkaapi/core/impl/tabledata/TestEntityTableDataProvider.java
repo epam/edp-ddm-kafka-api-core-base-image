@@ -22,13 +22,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestEntityTableDataProvider implements TableDataProvider {
 
-    @Override
-    public String tableName() {
-        return "test_entity";
-    }
+  @Override
+  public String tableName() {
+    return "test_entity";
+  }
 
-    @Override
-    public String pkColumnName() {
-        return "id";
-    }
+  @Override
+  public String pkColumnName() {
+    return "id";
+  }
 }

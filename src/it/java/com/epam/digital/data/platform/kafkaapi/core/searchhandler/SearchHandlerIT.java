@@ -64,7 +64,8 @@ class SearchHandlerIT {
     final List<TestEntity> found = instance.search(request);
 
     Assertions.assertThat(found).hasSize(2);
-    Assertions.assertThat(found.get(0).getPersonFullName()).isEqualTo(TEST_ENTITY.getPersonFullName());
+    Assertions.assertThat(found.get(0).getPersonFullName())
+        .isEqualTo(TEST_ENTITY.getPersonFullName());
     Assertions.assertThat(found.get(0).getPersonGender()).isEqualTo(TEST_ENTITY.getPersonGender());
   }
 }

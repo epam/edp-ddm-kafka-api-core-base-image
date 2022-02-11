@@ -16,6 +16,11 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.audit;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.epam.digital.data.platform.kafkaapi.core.aspect.AuditAspect;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CreateCommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.DeleteCommandHandlerTestImpl;
@@ -37,19 +42,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.support.MessageBuilder;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @Import({AopAutoConfiguration.class})
 @SpringBootTest(
     classes = {
-      AuditAspect.class,
-      KafkaAuditProcessor.class,
-      GenericCreateCommandListenerTestImpl.class,
-      GenericUpdateCommandListenerTestImpl.class,
-      GenericDeleteCommandListenerTestImpl.class
+        AuditAspect.class,
+        KafkaAuditProcessor.class,
+        GenericCreateCommandListenerTestImpl.class,
+        GenericUpdateCommandListenerTestImpl.class,
+        GenericDeleteCommandListenerTestImpl.class
     })
 @MockBean(DatabaseAuditProcessor.class)
 @MockBean(AbstractSearchHandler.class)

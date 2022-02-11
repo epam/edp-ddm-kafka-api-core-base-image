@@ -25,8 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestEntityDeleteCommandHandler extends AbstractDeleteCommandHandler<TestEntity> {
 
-  public TestEntityDeleteCommandHandler(EntityConverter<TestEntity> entityConverter,
-                                        TestEntityTableDataProvider tableDataProvider) {
+  public TestEntityDeleteCommandHandler(
+      EntityConverter<TestEntity> entityConverter,
+      TestEntityTableDataProvider tableDataProvider) {
     super(entityConverter, tableDataProvider);
   }
 }

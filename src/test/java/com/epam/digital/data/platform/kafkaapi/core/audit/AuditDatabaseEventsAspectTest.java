@@ -40,7 +40,6 @@ import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
 import com.epam.digital.data.platform.starter.security.dto.RolesDto;
-import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -106,8 +105,8 @@ class AuditDatabaseEventsAspectTest {
 
   @BeforeAll
   static void init() throws IOException {
-    ACCESS_TOKEN = new String(ByteStreams.toByteArray(
-        AuditDatabaseEventsAspectTest.class.getResourceAsStream("/accessToken.json")));
+    ACCESS_TOKEN = new String(AuditDatabaseEventsAspectTest.class
+        .getResourceAsStream("/accessToken.json").readAllBytes());
   }
 
   @BeforeEach
@@ -128,6 +127,7 @@ class AuditDatabaseEventsAspectTest {
   @Test
   void expectAuditAspectBeforeAndAfterFindByIdMethodWhenNoException() {
     when(accessPermissionService.hasReadAccess(any(), any(), any())).thenReturn(true);
+
     abstractQueryHandler.findById(mockRequest(ACCESS_TOKEN, ENTITY_ID));
 
     verify(databaseEventsFacade, times(2))

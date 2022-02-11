@@ -21,7 +21,8 @@ import com.epam.digital.data.platform.model.core.kafka.RequestContext;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
 
 public class SearchHandlerTestUtil {
-  public static  <I> Request<I> mockRequest(I criteria) {
+
+  public static <I> Request<I> mockRequest(I criteria) {
     return new Request<>(criteria, new RequestContext(), new SecurityContext());
   }
 }

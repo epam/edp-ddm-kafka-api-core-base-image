@@ -25,8 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TestEntityM2MCreateCommandHandler extends AbstractCreateCommandHandler<TestEntityM2M> {
 
-  public TestEntityM2MCreateCommandHandler(EntityConverter<TestEntityM2M> entityConverter,
-                                           TestEntityM2MTableDataProvider tableDataProvider) {
+  public TestEntityM2MCreateCommandHandler(
+      EntityConverter<TestEntityM2M> entityConverter,
+      TestEntityM2MTableDataProvider tableDataProvider) {
     super(entityConverter, tableDataProvider);
   }
 }

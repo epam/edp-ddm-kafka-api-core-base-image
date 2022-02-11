@@ -25,22 +25,21 @@ import org.jooq.Condition;
 import org.jooq.SelectFieldOrAsterisk;
 import org.jooq.impl.DSL;
 
-public class TestEntitySearchHandler extends AbstractSearchHandler<
-    TestEntitySearchConditions,
-    TestEntity> {
+public class TestEntitySearchHandler extends
+    AbstractSearchHandler<TestEntitySearchConditions, TestEntity> {
 
   private static final Integer MAX_LIMIT = 10;
 
   @Override
-  protected Condition whereClause(
-      TestEntitySearchConditions searchConditions) {
+  protected Condition whereClause(TestEntitySearchConditions searchConditions) {
     var c = DSL.noCondition();
 
     if (searchConditions.getPersonGender() != null) {
       c = c.and(DSL.field("person_gender").eq(searchConditions.getPersonGender()).toString());
     }
     if (searchConditions.getPersonFullName() != null) {
-      c = c.and(DSL.field("person_full_name").startsWithIgnoreCase(searchConditions.getPersonFullName()));
+      c = c.and(
+          DSL.field("person_full_name").startsWithIgnoreCase(searchConditions.getPersonFullName()));
     }
 
     return c;
@@ -58,14 +57,12 @@ public class TestEntitySearchHandler extends AbstractSearchHandler<
 
   @Override
   public List<SelectFieldOrAsterisk> selectFields() {
-    return Arrays.asList(DSL.field("id"),
-        DSL.field("person_gender"),
+    return Arrays.asList(DSL.field("id"), DSL.field("person_gender"),
         DSL.field("person_full_name"));
   }
 
   @Override
-  public Integer limit(
-      TestEntitySearchConditions searchConditions) {
+  public Integer limit(TestEntitySearchConditions searchConditions) {
     if (searchConditions.getLimit() != null) {
       return Math.min(searchConditions.getLimit(), MAX_LIMIT);
     }
@@ -74,8 +71,7 @@ public class TestEntitySearchHandler extends AbstractSearchHandler<
   }
 
   @Override
-  public Integer offset(
-      TestEntitySearchConditions searchConditions) {
+  public Integer offset(TestEntitySearchConditions searchConditions) {
     return searchConditions.getOffset();
   }
 }

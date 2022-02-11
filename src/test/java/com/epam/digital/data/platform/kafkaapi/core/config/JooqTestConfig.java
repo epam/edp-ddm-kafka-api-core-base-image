@@ -18,6 +18,7 @@ package com.epam.digital.data.platform.kafkaapi.core.config;
 
 import com.epam.digital.data.platform.starter.kafkaapi.config.JooqConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.sql.DataSource;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -26,8 +27,6 @@ import org.jooq.tools.jdbc.MockDataProvider;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
 
 @Configuration
 public class JooqTestConfig {

@@ -16,6 +16,8 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.config.TestConfiguration;
@@ -39,8 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-
 @TestConfiguration
 @SpringBootTest(
     classes = {
@@ -55,7 +55,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
     })
 class TestEntityFileCommandHandlerIT {
 
-  static final String EXISTING_RECORD_ID = "3cc262c1-0cd8-4d45-be66-eb0fca821e0a";
   static final String TYPICAL_UUID = "123e4567-e89b-12d3-a456-426655440000";
 
   @Autowired
@@ -78,9 +77,10 @@ class TestEntityFileCommandHandlerIT {
 
     existingTestRecord = DaoTestUtils.testEntityFile();
 
-    newTestRequest = new Request<>(newTestRecord, new RequestContext(), SecurityUtils.mockSecurityContext());
-    existingTestRequest =
-        new Request<>(existingTestRecord, new RequestContext(), SecurityUtils.mockSecurityContext());
+    newTestRequest = new Request<>(newTestRecord, new RequestContext(),
+        SecurityUtils.mockSecurityContext());
+    existingTestRequest = new Request<>(existingTestRecord, new RequestContext(),
+        SecurityUtils.mockSecurityContext());
   }
 
   @Test

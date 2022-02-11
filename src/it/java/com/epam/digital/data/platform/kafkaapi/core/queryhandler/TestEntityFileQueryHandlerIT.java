@@ -37,10 +37,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @TestConfiguration
 @SpringBootTest(
     classes = {
-      TestEntityFileQueryHandler.class,
-      AccessPermissionService.class,
-      JwtInfoProvider.class,
-      TokenParser.class
+        TestEntityFileQueryHandler.class,
+        AccessPermissionService.class,
+        JwtInfoProvider.class,
+        TokenParser.class
     })
 class TestEntityFileQueryHandlerIT {
 
@@ -59,8 +59,11 @@ class TestEntityFileQueryHandlerIT {
                 null,
                 mockSecurityContext()));
     Assertions.assertThat(found).isPresent();
-    Assertions.assertThat(found.get().getLegalEntityName()).isEqualTo(entityFile.getLegalEntityName());
-    Assertions.assertThat(found.get().getScanCopy().getId()).isEqualTo(entityFile.getScanCopy().getId());
-    Assertions.assertThat(found.get().getScanCopy().getChecksum()).isEqualTo(entityFile.getScanCopy().getChecksum());
+    Assertions.assertThat(found.get().getLegalEntityName())
+        .isEqualTo(entityFile.getLegalEntityName());
+    Assertions.assertThat(found.get().getScanCopy().getId())
+        .isEqualTo(entityFile.getScanCopy().getId());
+    Assertions.assertThat(found.get().getScanCopy().getChecksum())
+        .isEqualTo(entityFile.getScanCopy().getChecksum());
   }
 }

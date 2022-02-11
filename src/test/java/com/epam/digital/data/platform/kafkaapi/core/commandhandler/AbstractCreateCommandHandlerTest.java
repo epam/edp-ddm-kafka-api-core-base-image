@@ -16,6 +16,11 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CreateCommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.tabledata.MockEntityTableDataProviderImpl;
@@ -27,22 +32,14 @@ import com.epam.digital.data.platform.model.core.kafka.EntityId;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.RequestContext;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
-import com.epam.digital.data.platform.starter.security.dto.RolesDto;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = CreateCommandHandlerTestImpl.class)
 class AbstractCreateCommandHandlerTest {
@@ -53,7 +50,9 @@ class AbstractCreateCommandHandlerTest {
   private static final String PK_COLUMN_NAME = "consent_id";
 
   private static final UUID ENTITY_ID = UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
-
+  private final Request<MockEntity> request =
+      new Request<>(getMockedFactor(), new RequestContext(), null);
+  private final JwtClaimsDto userClaims = getMockedClaims();
   @MockBean
   private EntityConverter<MockEntity> entityConverter;
   @MockBean
@@ -62,12 +61,8 @@ class AbstractCreateCommandHandlerTest {
   private DmlOperationHandler dmlOperationHandler;
   @MockBean
   private JwtInfoProvider jwtInfoProvider;
-
   @Autowired
   private CreateCommandHandlerTestImpl commandHandler;
-
-  private final Request<MockEntity> request = new Request<>(getMockedFactor(), new RequestContext(), null);
-  private final JwtClaimsDto userClaims = getMockedClaims();
 
   @BeforeEach
   void setUp() {

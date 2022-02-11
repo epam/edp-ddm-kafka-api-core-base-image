@@ -70,7 +70,8 @@ public class DaoTestUtils {
     var r = new TestEntityFile();
     r.setId(TEST_ENTITY_FILE_ID);
     r.setLegalEntityName("FOP John Doe");
-    r.setScanCopy(new File("1", "0d5f97dd25b50267a1c03fba4d649d56d3d818704d0dcdfa692db62119b1221a"));
+    r.setScanCopy(
+        new File("1", "0d5f97dd25b50267a1c03fba4d649d56d3d818704d0dcdfa692db62119b1221a"));
     return r;
   }
 

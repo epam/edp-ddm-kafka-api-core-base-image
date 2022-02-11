@@ -16,6 +16,13 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.listener;
 
+import static com.epam.digital.data.platform.model.core.kafka.Status.INVALID_SIGNATURE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.CreateCommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ProcedureErrorException;
 import com.epam.digital.data.platform.kafkaapi.core.listener.impl.GenericCreateCommandListenerTestImpl;
@@ -26,6 +33,7 @@ import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Response;
 import com.epam.digital.data.platform.model.core.kafka.Status;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,15 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.UUID;
-
-import static com.epam.digital.data.platform.model.core.kafka.Status.INVALID_SIGNATURE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = GenericCreateCommandListenerTestImpl.class)
 class GenericCreateCommandListenerTest {
@@ -107,7 +106,8 @@ class GenericCreateCommandListenerTest {
 
   @Test
   void shouldReturnErrorStatusFromValidation() {
-    when(inputValidationService.validate(any(), any())).thenReturn(new ValidationResult(false, INVALID_SIGNATURE));
+    when(inputValidationService.validate(any(), any()))
+        .thenReturn(new ValidationResult(false, INVALID_SIGNATURE));
     var mockResponse = new Response<>();
     when(responseMessageCreator.createMessageByPayloadSize(any()))
         .thenReturn(MessageBuilder.withPayload(mockResponse).build());

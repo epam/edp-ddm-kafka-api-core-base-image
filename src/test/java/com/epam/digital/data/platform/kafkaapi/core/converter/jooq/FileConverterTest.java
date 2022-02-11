@@ -63,7 +63,8 @@ class FileConverterTest {
     var actualPgObject = (PGobject) actual;
 
     assertThat(actualPgObject.getType()).isEqualTo(FILE_DB_TYPE);
-    assertThat(actualPgObject.getValue()).isEqualTo(String.format("(%s,%s)", FILE_ID, FILE_CHECKSUM));
+    assertThat(actualPgObject.getValue())
+        .isEqualTo(String.format("(%s,%s)", FILE_ID, FILE_CHECKSUM));
   }
 
   @Test

@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.TestComponent;
 
 @TestComponent
 public class UpdateCommandHandlerTestImpl extends AbstractUpdateCommandHandler<MockEntity> {
+
   public UpdateCommandHandlerTestImpl(
       EntityConverter<MockEntity> entityConverter,
       MockEntityTableDataProviderImpl tableDataProvider) {

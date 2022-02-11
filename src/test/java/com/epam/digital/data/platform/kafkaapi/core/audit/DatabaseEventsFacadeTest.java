@@ -37,7 +37,6 @@ import com.epam.digital.data.platform.starter.audit.service.AuditService;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
 import com.epam.digital.data.platform.starter.security.jwt.TokenParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.ByteStreams;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.ZoneId;
@@ -57,26 +56,22 @@ class DatabaseEventsFacadeTest {
   private static final String TABLE_NAME = "table";
   private static final Set<String> FIELDS = Set.of("first", "second");
   private static JwtClaimsDto userClaims;
-
+  private final Clock clock =
+      Clock.fixed(CURR_TIME.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
   private DatabaseEventsFacade databaseEventsFacade;
-
   @Mock
   private AuditService auditService;
   @Mock
   private AuditSourceInfoProvider auditSourceInfoProvider;
   @Mock
   private TraceProvider traceProvider;
-
-  private final Clock clock =
-      Clock.fixed(CURR_TIME.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
-
   private AuditSourceInfo mockSourceInfo;
 
   @BeforeAll
   static void init() throws IOException {
     TokenParser tokenParser = new TokenParser(new ObjectMapper());
-    String accessToken = new String(ByteStreams.toByteArray(
-            DatabaseEventsFacadeTest.class.getResourceAsStream("/accessToken.json")));
+    String accessToken = new String(DatabaseEventsFacadeTest.class
+        .getResourceAsStream("/accessToken.json").readAllBytes());
     userClaims = tokenParser.parseClaims(accessToken);
   }
 
@@ -85,12 +80,11 @@ class DatabaseEventsFacadeTest {
     databaseEventsFacade =
         new DatabaseEventsFacade(
             auditService, APP_NAME, clock, traceProvider, auditSourceInfoProvider);
-
     when(traceProvider.getRequestId()).thenReturn(REQUEST_ID);
 
     mockSourceInfo = createSourceInfo();
     when(auditSourceInfoProvider.getAuditSourceInfo())
-            .thenReturn(mockSourceInfo);
+        .thenReturn(mockSourceInfo);
   }
 
   @Test
@@ -115,15 +109,15 @@ class DatabaseEventsFacadeTest {
     AuditEvent actualEvent = auditEventCaptor.getValue();
 
     var expectedEvent = AuditEvent.AuditEventBuilder.anAuditEvent()
-            .application(APP_NAME)
-            .name("DB request. Method: method")
-            .requestId(REQUEST_ID)
-            .sourceInfo(mockSourceInfo)
-            .userInfo(createUserInfo())
-            .currentTime(clock.millis())
-            .eventType(EventType.USER_ACTION)
-            .context(context)
-            .build();
+        .application(APP_NAME)
+        .name("DB request. Method: method")
+        .requestId(REQUEST_ID)
+        .sourceInfo(mockSourceInfo)
+        .userInfo(createUserInfo())
+        .currentTime(clock.millis())
+        .eventType(EventType.USER_ACTION)
+        .context(context)
+        .build();
 
     assertThat(actualEvent).usingRecursiveComparison().isEqualTo(expectedEvent);
   }

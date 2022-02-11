@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.TestComponent;
 
 @TestComponent
 public class DeleteCommandHandlerTestImpl extends AbstractDeleteCommandHandler<MockEntity> {
+
   public DeleteCommandHandlerTestImpl(
       EntityConverter<MockEntity> entityConverter,
       MockEntityTableDataProviderImpl tableDataProvider) {

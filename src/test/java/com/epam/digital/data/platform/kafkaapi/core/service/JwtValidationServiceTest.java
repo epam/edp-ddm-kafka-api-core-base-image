@@ -16,6 +16,10 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 import com.epam.digital.data.platform.integration.idm.client.KeycloakAuthRestClient;
 import com.epam.digital.data.platform.kafkaapi.core.config.KeycloakConfigProperties;
 import com.epam.digital.data.platform.kafkaapi.core.exception.JwtExpiredException;
@@ -30,26 +34,20 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.representations.idm.PublishedRealmRepresentation;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class JwtValidationServiceTest {
@@ -72,7 +70,7 @@ class JwtValidationServiceTest {
     jwtSigningKeyPair = generateSigningKeyPair();
 
     jwtValidationService = new JwtValidationService(true, keycloakConfigProperties,
-            keycloakRestClient, clock);
+        keycloakRestClient, clock);
 
     when(keycloakConfigProperties.getRealms()).thenReturn(Collections.singletonList(REALM));
     when(clock.millis())
@@ -87,7 +85,7 @@ class JwtValidationServiceTest {
   @Test
   void expectOperationTokenVerifiedWhenProcessingDisabled() throws JOSEException {
     jwtValidationService = new JwtValidationService(false, keycloakConfigProperties,
-            keycloakRestClient, clock);
+        keycloakRestClient, clock);
     jwtValidationService.postConstruct();
     Request<Void> input = mockRequest("", new Date());
 
@@ -99,7 +97,7 @@ class JwtValidationServiceTest {
   @Test
   void expectExceptionWhenOperationWithNoToken() {
     jwtValidationService = new JwtValidationService(true, keycloakConfigProperties,
-            keycloakRestClient, clock);
+        keycloakRestClient, clock);
     jwtValidationService.postConstruct();
     Request<Void> input = new Request<>();
 
@@ -116,7 +114,7 @@ class JwtValidationServiceTest {
         .thenReturn(new PublishedRealmRepresentation());
     Date tokenExp = Date.from(LocalDateTime.of(2021, 3, 1, 12, 0)
         .atZone(ZoneId.systemDefault()).toInstant());
-    Request<Void> input = mockRequest("/" + REALM,  tokenExp);
+    Request<Void> input = mockRequest("/" + REALM, tokenExp);
     jwtValidationService.postConstruct();
 
     boolean actual = jwtValidationService.isValid(input);
@@ -141,12 +139,12 @@ class JwtValidationServiceTest {
   void expectJwtVerificationExceptionWhenIssuerRealmIncorrect() throws JOSEException {
 
     Date tokenExp = Date.from(LocalDateTime.of(2021, 3, 1, 12, 0)
-            .atZone(ZoneId.systemDefault()).toInstant());
+        .atZone(ZoneId.systemDefault()).toInstant());
     Request<Void> input = mockRequest("/wrongRealm", tokenExp);
     jwtValidationService.postConstruct();
 
     JwtValidationException e = assertThrows(JwtValidationException.class,
-            () -> jwtValidationService.isValid(input));
+        () -> jwtValidationService.isValid(input));
 
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.JWT_INVALID);
   }
@@ -158,7 +156,8 @@ class JwtValidationServiceTest {
     Request<Void> input = mockRequest("", tokenExp);
     jwtValidationService.postConstruct();
 
-    JwtExpiredException e = assertThrows(JwtExpiredException.class, () -> jwtValidationService.isValid(input));
+    JwtExpiredException e = assertThrows(JwtExpiredException.class,
+        () -> jwtValidationService.isValid(input));
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.JWT_EXPIRED);
     assertThat(e.getDetails()).isNull();
   }

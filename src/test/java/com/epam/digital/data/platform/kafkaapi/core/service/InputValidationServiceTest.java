@@ -1,5 +1,8 @@
 package com.epam.digital.data.platform.kafkaapi.core.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.Status;
@@ -8,9 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InputValidationServiceTest {
@@ -33,8 +33,7 @@ class InputValidationServiceTest {
 
   @Test
   void expectValidationWithJwtInvalid() {
-    when(jwtValidationService.isValid(REQUEST))
-            .thenReturn(false);
+    when(jwtValidationService.isValid(REQUEST)).thenReturn(false);
 
     var actualResult = inputValidationService.validate("", REQUEST);
 
