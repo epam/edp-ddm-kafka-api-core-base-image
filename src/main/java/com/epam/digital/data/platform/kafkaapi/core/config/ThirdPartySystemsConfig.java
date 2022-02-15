@@ -59,13 +59,4 @@ public class ThirdPartySystemsConfig {
       CephS3Factory cephS3Factory) {
     return cephS3Factory.createCephService(uri, accessKey, secretKey);
   }
-
-  @Bean
-  public CephService datafactoryFileCephService(
-      @Value("${datafactory-file-ceph.http-endpoint}") String uri,
-      @Value("${datafactory-file-ceph.access-key}") String accessKey,
-      @Value("${datafactory-file-ceph.secret-key}") String secretKey,
-      CephS3Factory cephS3Factory) {
-    return cephS3Factory.createCephService(uri, accessKey, secretKey);
-  }
 }
