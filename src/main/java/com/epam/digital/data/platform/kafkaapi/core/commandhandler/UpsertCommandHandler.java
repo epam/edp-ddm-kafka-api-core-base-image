@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.kafkaapi.core.util;
+package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
 
-public enum Operation {
-    CREATE, READ, UPDATE, DELETE, SEARCH, UPSERT
+import com.epam.digital.data.platform.model.core.kafka.EntityId;
+import com.epam.digital.data.platform.model.core.kafka.Request;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
+
+public interface UpsertCommandHandler<T> {
+  @NewSpan
+  EntityId upsert(Request<T> input);
 }

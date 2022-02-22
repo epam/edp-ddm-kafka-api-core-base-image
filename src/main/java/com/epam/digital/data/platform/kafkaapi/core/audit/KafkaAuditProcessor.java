@@ -44,6 +44,7 @@ public class KafkaAuditProcessor implements AuditProcessor<Operation> {
   private static final String UPDATE = "KAFKA REQUEST UPDATE";
   private static final String DELETE = "KAFKA REQUEST DELETE";
   private static final String SEARCH = "KAFKA REQUEST SEARCH";
+  private static final String UPSERT = "KAFKA REQUEST UPSERT";
 
   static final String BEFORE = "BEFORE";
   static final String AFTER = "AFTER";
@@ -68,6 +69,8 @@ public class KafkaAuditProcessor implements AuditProcessor<Operation> {
         return prepareAndSendKafkaAudit(joinPoint, request, DELETE);
       case SEARCH:
         return prepareAndSendKafkaAudit(joinPoint, request, SEARCH);
+      case UPSERT:
+        return prepareAndSendKafkaAudit(joinPoint, request, UPSERT);
       default:
         throw new AuditException("Unsupported audit operation");
     }
