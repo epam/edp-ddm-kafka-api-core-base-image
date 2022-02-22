@@ -20,16 +20,29 @@ import com.epam.digital.data.platform.dso.client.DigitalSealRestClient;
 import com.epam.digital.data.platform.integration.ceph.config.S3ConfigProperties;
 import com.epam.digital.data.platform.integration.ceph.factory.CephS3Factory;
 import com.epam.digital.data.platform.integration.ceph.service.CephService;
-import com.epam.digital.data.platform.integration.idm.client.KeycloakAuthRestClient;
+import com.epam.digital.data.platform.integration.idm.config.IdmClientServiceConfig;
+import com.epam.digital.data.platform.integration.idm.factory.IdmServiceFactory;
+import com.epam.digital.data.platform.integration.idm.service.PublicIdmService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
-@EnableFeignClients(clients = {DigitalSealRestClient.class, KeycloakAuthRestClient.class})
+@Import(IdmClientServiceConfig.class)
+@EnableFeignClients(clients = {DigitalSealRestClient.class})
 public class ThirdPartySystemsConfig {
+
+  @Autowired
+  IdmServiceFactory idmServiceFactory;
+
+  @Bean
+  public PublicIdmService publicIdmService(){
+    return idmServiceFactory.createPublicIdmService();
+  }
 
   @Bean
   @ConfigurationProperties(prefix = "s3.config")
