@@ -16,35 +16,22 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.config;
 
-import com.epam.digital.data.platform.starter.database.config.JooqConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.sql.DataSource;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
-import org.jooq.tools.jdbc.MockConnection;
-import org.jooq.tools.jdbc.MockDataProvider;
-import org.mockito.Mockito;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 @Configuration
-public class JooqTestConfig {
+public class KafkaConfig {
 
   @Bean
-  public DSLContext context() {
-    MockDataProvider provider = new TestDataProvider();
-    MockConnection connection = new MockConnection(provider);
-    return DSL.using(connection, SQLDialect.POSTGRES);
+  public Serializer<String> keySerializer() {
+    return new StringSerializer();
   }
 
   @Bean
-  public DataSource dataSource() {
-    return Mockito.mock(DataSource.class);
-  }
-
-  @Bean
-  public ObjectMapper jooqMapper() {
-    return new JooqConfig().jooqMapper();
+  public <I> Serializer<I> valueSerializer() {
+    return new JsonSerializer<>();
   }
 }

@@ -16,35 +16,29 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.config;
 
-import com.epam.digital.data.platform.starter.database.config.JooqConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.sql.DataSource;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.impl.DSL;
-import org.jooq.tools.jdbc.MockConnection;
-import org.jooq.tools.jdbc.MockDataProvider;
-import org.mockito.Mockito;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import java.time.Clock;
 
 @Configuration
-public class JooqTestConfig {
+public class GenericConfig {
 
+  @Primary
   @Bean
-  public DSLContext context() {
-    MockDataProvider provider = new TestDataProvider();
-    MockConnection connection = new MockConnection(provider);
-    return DSL.using(connection, SQLDialect.POSTGRES);
+  public ObjectMapper objectMapper() {
+    final ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    return mapper;
   }
 
   @Bean
-  public DataSource dataSource() {
-    return Mockito.mock(DataSource.class);
-  }
-
-  @Bean
-  public ObjectMapper jooqMapper() {
-    return new JooqConfig().jooqMapper();
+  public Clock clock() {
+    return Clock.systemDefaultZone();
   }
 }
