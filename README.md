@@ -8,9 +8,9 @@ This library contains **all** the business logic of the Kafka API microservice w
 * DB
 
 # Extension points
-1. retrieval operations (GET) are not fully supported yet
+1. retrieval operations (GET) are supported as 'find by ID' and 'search'
 2. modifying operations (POST, PUT, PATCH, DELETE)
-    * `GenericQueryListener` to be sub-classed as a Kafka Listener
+    * `GenericCommandListener` to be sub-classed as a Kafka Listener
     * `AbstractCommandHandler` to be sub-classed as a DB-layer
 
 # Deployment
