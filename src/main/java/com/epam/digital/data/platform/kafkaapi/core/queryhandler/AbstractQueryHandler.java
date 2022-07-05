@@ -19,8 +19,10 @@ package com.epam.digital.data.platform.kafkaapi.core.queryhandler;
 import com.epam.digital.data.platform.kafkaapi.core.audit.AuditableDatabaseOperation;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ForbiddenOperationException;
 import com.epam.digital.data.platform.kafkaapi.core.exception.SqlErrorException;
+import com.epam.digital.data.platform.kafkaapi.core.model.FieldsAccessCheckDto;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
 import com.epam.digital.data.platform.kafkaapi.core.util.Operation;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
@@ -34,18 +36,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractQueryHandler<I, O> implements QueryHandler<I, O> {
-
   private final Logger log = LoggerFactory.getLogger(AbstractQueryHandler.class);
 
   @Autowired
   protected DSLContext context;
   @Autowired
   protected JwtInfoProvider jwtInfoProvider;
+  @Autowired
+  protected AccessPermissionService accessPermissionService;
 
-  protected final AccessPermissionService<O> accessPermissionService;
+  protected final TableDataProvider tableDataProvider;
 
-  protected AbstractQueryHandler(AccessPermissionService<O> accessPermissionService) {
-    this.accessPermissionService = accessPermissionService;
+  public AbstractQueryHandler(TableDataProvider tableDataProvider) {
+    this.tableDataProvider = tableDataProvider;
   }
 
   @AuditableDatabaseOperation(Operation.READ)
@@ -54,27 +57,26 @@ public abstract class AbstractQueryHandler<I, O> implements QueryHandler<I, O> {
     log.info("Reading from DB");
 
     JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
-    if (!accessPermissionService.hasReadAccess(tableName(), userClaims, entityType())) {
-      throw new ForbiddenOperationException("User has invalid role for search by ID");
+    if (!accessPermissionService.hasReadAccess(getFieldsToCheckAccess(), userClaims)) {
+      throw new ForbiddenOperationException(
+              "User has invalid role for search by ID from " + tableDataProvider.tableName());
     }
 
     I id = input.getPayload();
     try {
       final O dto =
-          context
-              .select(selectFields())
-              .from(DSL.table(tableName()))
-              .where(DSL.field(idName()).eq(id))
-              .fetchOneInto(entityType());
+              context
+                      .select(selectFields())
+                      .from(DSL.table(tableDataProvider.tableName()))
+                      .where(DSL.field(tableDataProvider.pkColumnName()).eq(id))
+                      .fetchOneInto(entityType());
       return Optional.ofNullable(dto);
     } catch (Exception e) {
       throw new SqlErrorException("Can not read from DB", e);
     }
   }
 
-  public abstract String idName();
-
-  public abstract String tableName();
+  public abstract List<FieldsAccessCheckDto> getFieldsToCheckAccess();
 
   public abstract Class<O> entityType();
 

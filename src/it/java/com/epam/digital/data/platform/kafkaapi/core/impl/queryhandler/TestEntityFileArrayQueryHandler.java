@@ -17,8 +17,9 @@
 package com.epam.digital.data.platform.kafkaapi.core.impl.queryhandler;
 
 import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityFileArray;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityFileArrayTableDataProvider;
+import com.epam.digital.data.platform.kafkaapi.core.model.FieldsAccessCheckDto;
 import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;
-import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
 import com.epam.digital.data.platform.kafkaapi.core.util.JooqDataTypes;
 import java.util.Arrays;
 import java.util.List;
@@ -29,19 +30,15 @@ import org.jooq.impl.DSL;
 public class TestEntityFileArrayQueryHandler extends
     AbstractQueryHandler<UUID, TestEntityFileArray> {
 
-  public TestEntityFileArrayQueryHandler(
-      AccessPermissionService<TestEntityFileArray> accessPermissionService) {
-    super(accessPermissionService);
+  public TestEntityFileArrayQueryHandler(TestEntityFileArrayTableDataProvider tableDataProvider) {
+    super(tableDataProvider);
   }
 
   @Override
-  public String idName() {
-    return "id";
-  }
-
-  @Override
-  public String tableName() {
-    return "test_entity_file_array";
+  public List<FieldsAccessCheckDto> getFieldsToCheckAccess() {
+    return List.of(
+        new FieldsAccessCheckDto(
+            "test_entity_file", List.of("id", "legal_entity_name", "scan_copies")));
   }
 
   @Override

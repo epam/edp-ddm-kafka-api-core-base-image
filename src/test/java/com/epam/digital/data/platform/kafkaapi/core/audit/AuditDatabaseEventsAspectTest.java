@@ -35,6 +35,7 @@ import com.epam.digital.data.platform.kafkaapi.core.queryhandler.impl.QueryHandl
 import com.epam.digital.data.platform.kafkaapi.core.searchhandler.impl.AbstractSearchHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.MockEntityTableDataProviderImpl;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
@@ -67,7 +68,7 @@ import org.springframework.test.context.ContextConfiguration;
         DatabaseAuditProcessor.class,
         DmlOperationHandler.class,
         QueryHandlerTestImpl.class,
-        AbstractSearchHandlerTestImpl.class
+        AbstractSearchHandlerTestImpl.class,
     })
 @MockBean(KafkaAuditProcessor.class)
 @MockBean(JwtInfoProvider.class)
@@ -86,11 +87,13 @@ class AuditDatabaseEventsAspectTest {
   private AbstractSearchHandlerTestImpl abstractSearchHandlerTest;
 
   @MockBean
-  private AccessPermissionService<MockEntity> accessPermissionService;
+  private AccessPermissionService accessPermissionService;
   @MockBean
   private DatabaseEventsFacade databaseEventsFacade;
   @MockBean
   private DataSource dataSource;
+  @MockBean
+  private MockEntityTableDataProviderImpl tableDataProvider;
 
   @Mock
   private ResultSet resultSet;
@@ -126,7 +129,9 @@ class AuditDatabaseEventsAspectTest {
 
   @Test
   void expectAuditAspectBeforeAndAfterFindByIdMethodWhenNoException() {
-    when(accessPermissionService.hasReadAccess(any(), any(), any())).thenReturn(true);
+    when(accessPermissionService.hasReadAccess(any(), any())).thenReturn(true);
+    when(tableDataProvider.tableName()).thenReturn("table");
+    when(tableDataProvider.pkColumnName()).thenReturn("consent_id");
 
     abstractQueryHandler.findById(mockRequest(ACCESS_TOKEN, ENTITY_ID));
 

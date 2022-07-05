@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
+import com.epam.digital.data.platform.kafkaapi.core.config.GenericConfig;
 import com.epam.digital.data.platform.kafkaapi.core.config.TestConfiguration;
 import com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler.TestEntityCreateCommandHandler;
 import com.epam.digital.data.platform.kafkaapi.core.impl.commandhandler.TestEntityDeleteCommandHandler;
@@ -51,7 +52,8 @@ import org.springframework.boot.test.context.SpringBootTest;
         TestEntityTableDataProvider.class,
         DmlOperationHandler.class,
         JwtInfoProvider.class,
-        TokenParser.class
+        TokenParser.class,
+        GenericConfig.class
     })
 class CommandHandlerIT {
 

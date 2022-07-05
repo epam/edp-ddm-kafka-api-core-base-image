@@ -95,7 +95,7 @@ class EntityConverterTest {
         .containsEntry("consent_id", CONSENT_ID.toString())
         .containsEntry(
             "consent_date",
-            CONSENT_DATE.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))
+            CONSENT_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
         .containsEntry("person_full_name", USER_NAME)
         .containsEntry("person_pass_number", USER_PASS)
         .containsEntry("passport_scan_copy", "(" + SCAN_COPY_ID + "," + SCAN_COPY_CHECKSUM + ")");
@@ -111,7 +111,7 @@ class EntityConverterTest {
         .containsEntry("consent_id", CONSENT_ID.toString())
         .containsEntry(
             "consent_date",
-            CONSENT_DATE.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))
+            CONSENT_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
         .containsEntry("person_full_name", USER_NAME)
         .containsEntry("person_pass_number", USER_PASS)
         .containsEntry("scan_copies", "{\"(id1,sum1)\",\"(id2,sum2)\",\"(id3,sum3)\"}");

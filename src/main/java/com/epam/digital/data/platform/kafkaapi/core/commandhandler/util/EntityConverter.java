@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -137,7 +138,7 @@ public class EntityConverter<T> {
   }
 
   private String toCompatibleString(Map<?, ?> map) {
-    return "(" + map.values().stream().map(Object::toString).collect(Collectors.joining(",")) + ")";
+    return "(" + map.values().stream().map(Objects::toString).collect(Collectors.joining(",")) + ")";
   }
 
   private String toCompatibleStringWithInnerMap(Map<?, ?> map) {

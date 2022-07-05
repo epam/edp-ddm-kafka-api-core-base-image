@@ -17,7 +17,7 @@
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl;
 
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.AbstractUpdateCommandHandler;
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.tabledata.MockEntityTableDataProviderImpl;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.MockEntityTableDataProviderImpl;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import org.springframework.boot.test.context.TestComponent;

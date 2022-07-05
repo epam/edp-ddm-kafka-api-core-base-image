@@ -18,6 +18,7 @@ package com.epam.digital.data.platform.kafkaapi.core.service;
 
 import com.epam.digital.data.platform.kafkaapi.core.config.JooqTestConfig;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ForbiddenOperationException;
+import com.epam.digital.data.platform.kafkaapi.core.model.FieldsAccessCheckDto;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import com.epam.digital.data.platform.model.core.kafka.Status;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
@@ -51,7 +52,7 @@ class AccessPermissionServiceTest {
   private static final List<String> ROLES = singletonList("role");
 
   @Autowired
-  private AccessPermissionService<MockEntity> accessPermissionService;
+  private AccessPermissionService accessPermissionService;
 
   @MockBean
   private DataSource dataSource;
@@ -92,7 +93,18 @@ class AccessPermissionServiceTest {
     when(resultSet.getBoolean(1)).thenReturn(true);
     JwtClaimsDto userClaims = getMockedClaims();
 
-    boolean actual = accessPermissionService.hasReadAccess(TABLE_NAME, userClaims, MockEntity.class);
+    boolean actual =
+        accessPermissionService.hasReadAccess(
+            List.of(
+                new FieldsAccessCheckDto(
+                    TABLE_NAME,
+                    List.of(
+                        "consent_id",
+                        "consent_date",
+                        "person_full_name",
+                        "person_pass_number",
+                        "passport_scan_copy"))),
+            userClaims);
 
     assertThat(actual).isTrue();
 
@@ -120,7 +132,18 @@ class AccessPermissionServiceTest {
     when(resultSet.next()).thenReturn(false);
     JwtClaimsDto userClaims = getMockedClaims();
 
-    boolean actual = accessPermissionService.hasReadAccess(TABLE_NAME, userClaims, MockEntity.class);
+    boolean actual =
+        accessPermissionService.hasReadAccess(
+            List.of(
+                new FieldsAccessCheckDto(
+                    TABLE_NAME,
+                    List.of(
+                        "consent_id",
+                        "consent_date",
+                        "person_full_name",
+                        "person_pass_number",
+                        "passport_scan_copy"))),
+            userClaims);
 
     assertThat(actual).isFalse();
   }
@@ -135,7 +158,16 @@ class AccessPermissionServiceTest {
             ForbiddenOperationException.class,
             () ->
                 accessPermissionService.hasReadAccess(
-                    TABLE_NAME, userClaims, MockEntity.class));
+                    List.of(
+                        new FieldsAccessCheckDto(
+                            TABLE_NAME,
+                            List.of(
+                                "consent_id",
+                                "consent_date",
+                                "person_full_name",
+                                "person_pass_number",
+                                "passport_scan_copy"))),
+                    userClaims));
 
     assertThat(e.getKafkaResponseStatus()).isEqualTo(Status.FORBIDDEN_OPERATION);
     assertThat(e.getDetails()).isNull();

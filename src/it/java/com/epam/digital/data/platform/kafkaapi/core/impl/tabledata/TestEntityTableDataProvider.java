@@ -16,7 +16,7 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.impl.tabledata;
 
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.TableDataProvider;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
 import org.springframework.stereotype.Component;
 
 @Component

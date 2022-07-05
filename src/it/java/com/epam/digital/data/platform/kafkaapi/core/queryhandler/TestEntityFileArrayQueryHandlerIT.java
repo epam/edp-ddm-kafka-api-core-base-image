@@ -20,6 +20,8 @@ import static com.epam.digital.data.platform.kafkaapi.core.util.DaoTestUtils.TES
 import static com.epam.digital.data.platform.kafkaapi.core.util.SecurityUtils.mockSecurityContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.epam.digital.data.platform.kafkaapi.core.config.GenericConfig;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityFileArrayTableDataProvider;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.kafkaapi.core.config.TestConfiguration;
 import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityFileArray;
@@ -38,9 +40,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
     classes = {
       TestEntityFileArrayQueryHandler.class,
+      TestEntityFileArrayTableDataProvider.class,
       AccessPermissionService.class,
       JwtInfoProvider.class,
-      TokenParser.class
+      TokenParser.class,
+      GenericConfig.class
     })
 class TestEntityFileArrayQueryHandlerIT {
 

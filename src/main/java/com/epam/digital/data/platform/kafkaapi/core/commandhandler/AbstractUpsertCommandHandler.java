@@ -17,6 +17,7 @@
 package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
 
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
 import com.epam.digital.data.platform.model.core.kafka.EntityId;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import java.util.Map;

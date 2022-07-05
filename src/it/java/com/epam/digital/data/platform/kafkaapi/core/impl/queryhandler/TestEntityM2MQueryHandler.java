@@ -17,6 +17,8 @@
 package com.epam.digital.data.platform.kafkaapi.core.impl.queryhandler;
 
 import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityM2M;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityM2MTableDataProvider;
+import com.epam.digital.data.platform.kafkaapi.core.model.FieldsAccessCheckDto;
 import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
 import com.epam.digital.data.platform.kafkaapi.core.util.JooqDataTypes;
@@ -28,19 +30,13 @@ import org.jooq.impl.DSL;
 
 public class TestEntityM2MQueryHandler extends AbstractQueryHandler<UUID, TestEntityM2M> {
 
-  public TestEntityM2MQueryHandler(
-      AccessPermissionService<TestEntityM2M> accessPermissionService) {
-    super(accessPermissionService);
+  public TestEntityM2MQueryHandler(TestEntityM2MTableDataProvider tableDataProvider) {
+    super(tableDataProvider);
   }
 
   @Override
-  public String idName() {
-    return "id";
-  }
-
-  @Override
-  public String tableName() {
-    return "test_entity_m2m";
+  public List<FieldsAccessCheckDto> getFieldsToCheckAccess() {
+    return List.of(new FieldsAccessCheckDto("test_entity_m2m", List.of("id", "name", "entities")));
   }
 
   @Override

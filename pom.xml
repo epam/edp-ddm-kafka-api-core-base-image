@@ -5,7 +5,7 @@
 
   <groupId>com.epam.digital.data.platform</groupId>
   <artifactId>kafka-api-core</artifactId>
-  <version>1.6.0</version>
+  <version>1.8.0</version>
 
   <name>kafka-api-core</name>
   <description>Static classes for kafka api component</description>
@@ -13,7 +13,7 @@
   <properties>
     <model.core.version>1.6.0.60</model.core.version>
     <ddm.starter.kafka.version>1.6.0.2</ddm.starter.kafka.version>
-    <ddm.starter.database.version>1.6.0.1</ddm.starter.database.version>
+    <ddm.starter.database.version>1.8.0.1</ddm.starter.database.version>
     <ddm.starter.logger.version>1.6.0.1</ddm.starter.logger.version>
     <ddm.starter.actuator.version>1.6.0.1</ddm.starter.actuator.version>
     <ddm.starter.audit.version>1.6.0.1</ddm.starter.audit.version>
@@ -286,5 +286,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>

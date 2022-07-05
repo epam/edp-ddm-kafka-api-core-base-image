@@ -20,6 +20,7 @@ import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOper
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
 import com.epam.digital.data.platform.model.core.kafka.EntityId;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;

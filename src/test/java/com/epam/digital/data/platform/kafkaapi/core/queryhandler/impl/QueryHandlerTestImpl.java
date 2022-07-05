@@ -16,8 +16,10 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.queryhandler.impl;
 
+import com.epam.digital.data.platform.kafkaapi.core.model.FieldsAccessCheckDto;
 import com.epam.digital.data.platform.kafkaapi.core.queryhandler.AbstractQueryHandler;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.MockEntityTableDataProviderImpl;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
 import java.util.Arrays;
 import java.util.List;
@@ -28,19 +30,15 @@ import org.springframework.boot.test.context.TestComponent;
 
 @TestComponent
 public class QueryHandlerTestImpl extends AbstractQueryHandler<UUID, MockEntity> {
-  public QueryHandlerTestImpl(
-      AccessPermissionService<MockEntity> accessPermissionService) {
-    super(accessPermissionService);
+  public QueryHandlerTestImpl(MockEntityTableDataProviderImpl tableDataProvider) {
+    super(tableDataProvider);
   }
 
   @Override
-  public String idName() {
-    return "id";
-  }
-
-  @Override
-  public String tableName() {
-    return "table";
+  public List<FieldsAccessCheckDto> getFieldsToCheckAccess() {
+    return List.of(
+        new FieldsAccessCheckDto(
+            "table", List.of("consent_id", "person_full_name", "person_pass_number")));
   }
 
   @Override
@@ -51,8 +49,6 @@ public class QueryHandlerTestImpl extends AbstractQueryHandler<UUID, MockEntity>
   @Override
   public List<SelectFieldOrAsterisk> selectFields() {
     return Arrays.asList(
-        DSL.field("consent_id"),
-        DSL.field("person_full_name"),
-        DSL.field("person_pass_number"));
+        DSL.field("consent_id"), DSL.field("person_full_name"), DSL.field("person_pass_number"));
   }
 }

@@ -21,6 +21,7 @@ import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOpera
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ConstraintViolationException;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.starter.security.dto.JwtClaimsDto;
 import org.slf4j.Logger;

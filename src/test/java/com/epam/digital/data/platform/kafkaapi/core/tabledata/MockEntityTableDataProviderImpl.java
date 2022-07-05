@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.kafkaapi.core.impl.tabledata;
+package com.epam.digital.data.platform.kafkaapi.core.tabledata;
 
-import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.TestComponent;
 
-@Component
-public class TestEntityM2MTableDataProvider implements TableDataProvider {
+@TestComponent
+public class MockEntityTableDataProviderImpl implements TableDataProvider {
 
   @Override
   public String tableName() {
-    return "test_entity_m2m";
+    return "table";
   }
 
   @Override
   public String pkColumnName() {
-    return "id";
+    return "consent_id";
   }
 }

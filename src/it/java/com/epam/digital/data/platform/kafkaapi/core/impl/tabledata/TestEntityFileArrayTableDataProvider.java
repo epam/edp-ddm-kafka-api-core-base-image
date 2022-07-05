@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package com.epam.digital.data.platform.kafkaapi.core.commandhandler;
+package com.epam.digital.data.platform.kafkaapi.core.impl.tabledata;
 
-public interface TableDataProvider {
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.TableDataProvider;
+import org.springframework.stereotype.Component;
 
-  String tableName();
+@Component
+public class TestEntityFileArrayTableDataProvider implements TableDataProvider {
 
-  String pkColumnName();
+  @Override
+  public String tableName() {
+    return "test_entity_file_array";
+  }
+
+  @Override
+  public String pkColumnName() {
+    return "id";
+  }
 }

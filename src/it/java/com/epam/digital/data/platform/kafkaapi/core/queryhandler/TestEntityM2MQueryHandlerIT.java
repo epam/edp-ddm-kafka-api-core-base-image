@@ -19,9 +19,12 @@ package com.epam.digital.data.platform.kafkaapi.core.queryhandler;
 import static com.epam.digital.data.platform.kafkaapi.core.util.DaoTestUtils.TEST_ENTITY_M2M;
 import static com.epam.digital.data.platform.kafkaapi.core.util.SecurityUtils.mockSecurityContext;
 
+import com.epam.digital.data.platform.kafkaapi.core.config.GenericConfig;
 import com.epam.digital.data.platform.kafkaapi.core.config.TestConfiguration;
 import com.epam.digital.data.platform.kafkaapi.core.impl.model.TestEntityM2M;
 import com.epam.digital.data.platform.kafkaapi.core.impl.queryhandler.TestEntityM2MQueryHandler;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityM2MTableDataProvider;
+import com.epam.digital.data.platform.kafkaapi.core.impl.tabledata.TestEntityTableDataProvider;
 import com.epam.digital.data.platform.kafkaapi.core.service.AccessPermissionService;
 import com.epam.digital.data.platform.kafkaapi.core.service.JwtInfoProvider;
 import com.epam.digital.data.platform.model.core.kafka.Request;
@@ -38,9 +41,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(
     classes = {
         TestEntityM2MQueryHandler.class,
+        TestEntityM2MTableDataProvider.class,
         AccessPermissionService.class,
         JwtInfoProvider.class,
-        TokenParser.class
+        TokenParser.class,
+        GenericConfig.class
     })
 class TestEntityM2MQueryHandlerIT {
 

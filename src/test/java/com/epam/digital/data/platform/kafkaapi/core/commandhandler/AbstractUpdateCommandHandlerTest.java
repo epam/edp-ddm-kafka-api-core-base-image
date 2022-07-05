@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.impl.UpdateCommandHandlerTestImpl;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.model.DmlOperationArgs;
-import com.epam.digital.data.platform.kafkaapi.core.commandhandler.tabledata.MockEntityTableDataProviderImpl;
+import com.epam.digital.data.platform.kafkaapi.core.tabledata.MockEntityTableDataProviderImpl;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.DmlOperationHandler;
 import com.epam.digital.data.platform.kafkaapi.core.commandhandler.util.EntityConverter;
 import com.epam.digital.data.platform.kafkaapi.core.exception.ConstraintViolationException;
