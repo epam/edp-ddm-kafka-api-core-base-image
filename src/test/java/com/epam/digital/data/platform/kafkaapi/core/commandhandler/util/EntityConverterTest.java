@@ -20,12 +20,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.epam.digital.data.platform.kafkaapi.core.config.JooqTestConfig;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
+import com.epam.digital.data.platform.kafkaapi.core.util.MockEntityMultiFiles;
 import com.epam.digital.data.platform.model.core.kafka.File;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.RequestContext;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -66,6 +68,9 @@ class EntityConverterTest {
   @Autowired
   private EntityConverter<MockEntity> entityConverter;
 
+  @Autowired
+  private EntityConverter<MockEntityMultiFiles> entityConverterMultiFiles;
+  
   @BeforeAll
   static void init() {
     context.setBusinessActivity(BUSINESS_ACTIVITY);
@@ -97,6 +102,22 @@ class EntityConverterTest {
   }
 
   @Test
+  void expectEntityWithInnerMapIsMappedToDbFields() {
+    var mockEntity = getMockEntityMultiFiles();
+    Map<String, Object> entityMap = entityConverterMultiFiles.entityToMap(mockEntity);
+
+    assertThat(entityMap)
+        .hasSize(5)
+        .containsEntry("consent_id", CONSENT_ID.toString())
+        .containsEntry(
+            "consent_date",
+            CONSENT_DATE.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))
+        .containsEntry("person_full_name", USER_NAME)
+        .containsEntry("person_pass_number", USER_PASS)
+        .containsEntry("scan_copies", "{\"(id1,sum1)\",\"(id2,sum2)\",\"(id3,sum3)\"}");
+  }
+
+  @Test
   void expectSysValuesFilledFromInput() {
     Map<String, String> sysValuesMapped =
         entityConverter.buildSysValues(USER_ID, new Request<>(null, context, securityContext));
@@ -124,6 +145,21 @@ class EntityConverterTest {
     mockEntity.setPassportScanCopy(new File());
     mockEntity.getPassportScanCopy().setId(SCAN_COPY_ID);
     mockEntity.getPassportScanCopy().setChecksum(SCAN_COPY_CHECKSUM);
+    return mockEntity;
+  }
+  
+  private MockEntityMultiFiles getMockEntityMultiFiles() {
+    MockEntityMultiFiles mockEntity = new MockEntityMultiFiles();
+    mockEntity.setConsentId(CONSENT_ID);
+    mockEntity.setConsentDate(CONSENT_DATE);
+    mockEntity.setPersonFullName(USER_NAME);
+    mockEntity.setPersonPassNumber(USER_PASS);
+    
+    var file1 = new File("id1", "sum1");
+    var file2 = new File("id2", "sum2");
+    var file3 = new File("id3", "sum3");
+    mockEntity.setScanCopies(List.of(file1, file2, file3));
+    
     return mockEntity;
   }
 }
