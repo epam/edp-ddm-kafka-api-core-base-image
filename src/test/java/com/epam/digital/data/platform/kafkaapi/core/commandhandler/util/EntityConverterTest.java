@@ -18,13 +18,17 @@ package com.epam.digital.data.platform.kafkaapi.core.commandhandler.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.epam.digital.data.platform.kafkaapi.core.config.GenericConfig;
 import com.epam.digital.data.platform.kafkaapi.core.config.JooqTestConfig;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntity;
+import com.epam.digital.data.platform.model.core.geometry.Point;
 import com.epam.digital.data.platform.kafkaapi.core.util.MockEntityMultiFiles;
 import com.epam.digital.data.platform.model.core.kafka.File;
 import com.epam.digital.data.platform.model.core.kafka.Request;
 import com.epam.digital.data.platform.model.core.kafka.RequestContext;
 import com.epam.digital.data.platform.model.core.kafka.SecurityContext;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -37,7 +41,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(classes = {
-    EntityConverter.class
+    EntityConverter.class,
+    GenericConfig.class
 })
 @ContextConfiguration(classes = JooqTestConfig.class)
 class EntityConverterTest {
@@ -70,7 +75,7 @@ class EntityConverterTest {
 
   @Autowired
   private EntityConverter<MockEntityMultiFiles> entityConverterMultiFiles;
-  
+
   @BeforeAll
   static void init() {
     context.setBusinessActivity(BUSINESS_ACTIVITY);
@@ -91,14 +96,15 @@ class EntityConverterTest {
     Map<String, Object> entityMap = entityConverter.entityToMap(mockEntity);
 
     assertThat(entityMap)
-        .hasSize(5)
+        .hasSize(6)
         .containsEntry("consent_id", CONSENT_ID.toString())
         .containsEntry(
             "consent_date",
-            CONSENT_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            CONSENT_DATE.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))
         .containsEntry("person_full_name", USER_NAME)
         .containsEntry("person_pass_number", USER_PASS)
-        .containsEntry("passport_scan_copy", "(" + SCAN_COPY_ID + "," + SCAN_COPY_CHECKSUM + ")");
+        .containsEntry("passport_scan_copy", "(" + SCAN_COPY_ID + "," + SCAN_COPY_CHECKSUM + ")")
+        .containsEntry("location", "SRID=4326;POINT(1.1 1.3)");
   }
 
   @Test
@@ -111,7 +117,7 @@ class EntityConverterTest {
         .containsEntry("consent_id", CONSENT_ID.toString())
         .containsEntry(
             "consent_date",
-            CONSENT_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            CONSENT_DATE.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))
         .containsEntry("person_full_name", USER_NAME)
         .containsEntry("person_pass_number", USER_PASS)
         .containsEntry("scan_copies", "{\"(id1,sum1)\",\"(id2,sum2)\",\"(id3,sum3)\"}");
@@ -145,21 +151,26 @@ class EntityConverterTest {
     mockEntity.setPassportScanCopy(new File());
     mockEntity.getPassportScanCopy().setId(SCAN_COPY_ID);
     mockEntity.getPassportScanCopy().setChecksum(SCAN_COPY_CHECKSUM);
+
+    Point location = new Point();
+    location.setLatitude(BigDecimal.valueOf(1.1));
+    location.setLongitude(BigDecimal.valueOf(1.3));
+    mockEntity.setLocation(location);
     return mockEntity;
   }
-  
+
   private MockEntityMultiFiles getMockEntityMultiFiles() {
     MockEntityMultiFiles mockEntity = new MockEntityMultiFiles();
     mockEntity.setConsentId(CONSENT_ID);
     mockEntity.setConsentDate(CONSENT_DATE);
     mockEntity.setPersonFullName(USER_NAME);
     mockEntity.setPersonPassNumber(USER_PASS);
-    
+
     var file1 = new File("id1", "sum1");
     var file2 = new File("id2", "sum2");
     var file3 = new File("id3", "sum3");
     mockEntity.setScanCopies(List.of(file1, file2, file3));
-    
+
     return mockEntity;
   }
 }

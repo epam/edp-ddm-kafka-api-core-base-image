@@ -52,10 +52,10 @@ public class EntityConverter<T> {
   private static final String DIGITAL_SIGNATURE_CHECKSUM = "ddm_digital_sign_checksum";
   private static final String DIGITAL_SIGNATURE_DERIVED_CHECKSUM = "ddm_digital_sign_derived_checksum";
 
-  private final ObjectMapper objectMapper;
+  private final ObjectMapper hstoreSerializingMapper;
 
-  public EntityConverter(@Qualifier("jooqMapper") ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
+  public EntityConverter(@Qualifier("hstoreSerializingMapper") ObjectMapper hstoreSerializingMapper) {
+    this.hstoreSerializingMapper = hstoreSerializingMapper;
   }
 
   public String getUuidOfEntity(T entity, String column) {
@@ -65,7 +65,7 @@ public class EntityConverter<T> {
 
   public Map<String, Object> entityToMap(T entity) {
     TypeReference<Map<String, Object>> reference = new TypeReference<>() {};
-    Map<String, Object> entityMap = objectMapper.convertValue(entity, reference);
+    Map<String, Object> entityMap = hstoreSerializingMapper.convertValue(entity, reference);
     entityMap.putAll(listsToStrings(entityMap));
     entityMap.putAll(mapsToStrings(entityMap));
     return entityMap;

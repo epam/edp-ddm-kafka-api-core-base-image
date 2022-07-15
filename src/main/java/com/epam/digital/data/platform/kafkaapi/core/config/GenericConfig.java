@@ -16,8 +16,11 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.config;
 
+import com.epam.digital.data.platform.kafkaapi.core.dbserializer.PointSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +37,18 @@ public class GenericConfig {
     final ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new JavaTimeModule());
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    return mapper;
+  }
+
+  @Bean("hstoreSerializingMapper")
+  public ObjectMapper hstoreSerializingMapper() {
+    final ObjectMapper mapper = new ObjectMapper();
+    mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    mapper.registerModule(new JavaTimeModule());
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    SimpleModule serializingModule = new SimpleModule();
+    serializingModule.addSerializer(new PointSerializer());
+    mapper.registerModule(serializingModule);
     return mapper;
   }
 

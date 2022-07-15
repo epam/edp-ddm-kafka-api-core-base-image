@@ -35,7 +35,8 @@ import org.springframework.test.context.ContextConfiguration;
     DatabaseConfig.class,
     JooqConfig.class,
     JooqAutoConfiguration.class,
-    EntityConverter.class
+    EntityConverter.class,
+    GenericConfig.class
 })
 public @interface TestConfiguration {
 

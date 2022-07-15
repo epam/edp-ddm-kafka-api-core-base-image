@@ -16,6 +16,7 @@
 
 package com.epam.digital.data.platform.kafkaapi.core.util;
 
+import com.epam.digital.data.platform.model.core.geometry.Geometry;
 import com.epam.digital.data.platform.model.core.kafka.File;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
@@ -35,6 +36,8 @@ public class MockEntity {
   private String personPassNumber;
 
   private File passportScanCopy;
+
+  private Geometry location;
 
   public UUID getConsentId() {
     return this.consentId;
@@ -74,5 +77,13 @@ public class MockEntity {
 
   public void setPassportScanCopy(File passportScanCopy) {
     this.passportScanCopy = passportScanCopy;
+  }
+
+  public Geometry getLocation() {
+    return location;
+  }
+
+  public void setLocation(Geometry location) {
+    this.location = location;
   }
 }
