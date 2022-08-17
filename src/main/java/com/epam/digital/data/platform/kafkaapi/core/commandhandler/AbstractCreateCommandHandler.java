@@ -47,6 +47,7 @@ public abstract class AbstractCreateCommandHandler<T> implements CreateCommandHa
 
   @Override
   public EntityId save(Request<T> input) {
+    requestPreprocessor(input);
     JwtClaimsDto userClaims = jwtInfoProvider.getUserClaims(input);
     Map<String, Object> entityMap = entityConverter.entityToMap(input.getPayload());
     entityMap.remove(tableDataProvider.pkColumnName());
@@ -58,5 +59,8 @@ public abstract class AbstractCreateCommandHandler<T> implements CreateCommandHa
                 .saveOperationArgs(entityMap)
                 .build());
     return new EntityId(UUID.fromString(id));
+  }
+  
+  public void requestPreprocessor(Request<T> input) {
   }
 }

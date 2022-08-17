@@ -158,6 +158,26 @@ values ('7f017d37-6ba5-4849-a4b2-f6a3ef2cadb9', 'FOP John Doe',
         current_timestamp, current_timestamp, current_user, current_user
         );
 
+--- test_entity_with_auto_generated_value:
+CREATE TABLE test_entity_with_auto_generated_value
+(
+    id uuid NOT NULL,
+    person_full_name text NOT NULL,
+    auto_generated_number text NOT NULL,
+    ddm_created_at timestamptz NOT NULL DEFAULT now(),
+    ddm_created_by text NOT NULL,
+    ddm_updated_at timestamptz NOT NULL DEFAULT now(),
+    ddm_updated_by text NOT NULL,
+    CONSTRAINT pk_test_entity_with_auto_generated_value PRIMARY KEY (id)
+);
+
+insert into test_entity_with_auto_generated_value (id, person_full_name, auto_generated_number,
+                             ddm_created_at, ddm_updated_at, ddm_created_by, ddm_updated_by)
+values ('88888888-8888-8888-8888-888888888888', 'FOP John Doe',
+        'АА/24-02-20022/04:45:00/346', current_timestamp, current_timestamp, current_user, current_user);
+
+CREATE SEQUENCE IF NOT EXISTS test_entity_with_auto_generated_value_auto_generated_number_seq 
+    INCREMENT BY 1 OWNED BY test_entity_with_auto_generated_value.auto_generated_number; 
 --- views:
 CREATE OR REPLACE VIEW test_entity_by_enum_and_name_starts_with_limit_offset_v AS
 SELECT c.id, c.person_full_name, c.person_gender
